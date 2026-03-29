@@ -1,6 +1,6 @@
 """
-QCAUS v13.0 – COMPLETE UNIFIED SUITE
-Image Upload | Before/After | FDM Derivation | All Visualizations
+QCAUS v14.0 – FIXED DISPLAY
+All visualizations now render correctly
 """
 
 import streamlit as st
@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw, ImageFont
 from scipy.ndimage import gaussian_filter
 from astropy.io import fits
 import io
+import time
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -17,7 +18,7 @@ warnings.filterwarnings('ignore')
 # ── PAGE CONFIG ─────────────────────────────────────────────
 st.set_page_config(
     layout="wide",
-    page_title="QCAUS v13.0 - Complete Suite",
+    page_title="QCAUS v14.0",
     page_icon="🔭",
     initial_sidebar_state="expanded"
 )
@@ -29,13 +30,7 @@ st.markdown("""
     .stTitle, h1, h2, h3 { color: #1e3a5f; }
     [data-testid="stMetricValue"] { color: #1e3a5f; }
     .stDownloadButton button { background-color: #1e3a5f; color: white; border-radius: 8px; }
-    .upload-area {
-        border: 2px dashed #1e3a5f;
-        border-radius: 10px;
-        padding: 20px;
-        text-align: center;
-        margin: 10px 0;
-    }
+    .stImage { border-radius: 8px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -43,7 +38,6 @@ st.markdown("""
 # ── PHYSICS FUNCTIONS ─────────────────────────────────────────────
 
 def fdm_soliton_profile(r, m_fdm=1e-22, rho0=1.0):
-    """ρ(r) = ρ₀ [sin(kr)/(kr)]²"""
     r_s = 1.0 / (m_fdm * 1e-22)
     k = np.pi / max(r_s, 0.01)
     kr = k * r
@@ -53,7 +47,6 @@ def fdm_soliton_profile(r, m_fdm=1e-22, rho0=1.0):
 
 
 def fdm_soliton_2d(size, m_fdm=1e-22):
-    """2D soliton map"""
     y, x = np.ogrid[:size, :size]
     cx, cy = size//2, size//2
     r = np.sqrt((x - cx)**2 + (y - cy)**2) / size * 5
@@ -61,7 +54,6 @@ def fdm_soliton_2d(size, m_fdm=1e-22):
 
 
 def dark_photon_wave(size, fringe):
-    """Dark Photon Wave - λ = h/(m v)"""
     h, w = size, size
     y, x = np.ogrid[:h, :w]
     cx, cy = w//2, h//2
@@ -76,7 +68,6 @@ def dark_photon_wave(size, fringe):
 
 
 def generate_interference_pattern(size=400, fringe=65, omega=0.7):
-    """Generate interference pattern"""
     h, w = size, size
     y, x = np.ogrid[:h, :w]
     cx, cy = w//2, h//2
@@ -102,7 +93,6 @@ def generate_interference_pattern(size=400, fringe=65, omega=0.7):
 
 
 def dark_photon_conversion_signal(image, epsilon=1e-10, B_field=1e15, m_dark=1e-9):
-    """Dark photon conversion signal"""
     mixing = epsilon * B_field / (m_dark + 1e-12)
     signal = image * mixing * 5
     signal = np.clip(signal, 0, 1)
@@ -111,7 +101,6 @@ def dark_photon_conversion_signal(image, epsilon=1e-10, B_field=1e15, m_dark=1e-
 
 
 def load_image(uploaded_file):
-    """Load image from uploaded file"""
     if uploaded_file.name.endswith('.fits'):
         with fits.open(io.BytesIO(uploaded_file.read())) as hdul:
             data = hdul[0].data.astype(np.float32)
@@ -133,23 +122,20 @@ def load_image(uploaded_file):
 
 
 def add_annotations(image_array, metadata, scale_kpc=100, title="After"):
-    """Add annotations to image"""
     h, w = image_array.shape[:2]
     img_pil = Image.fromarray((np.clip(image_array, 0, 1) * 255).astype(np.uint8)).convert('RGB')
     draw = ImageDraw.Draw(img_pil)
     
     try:
         font = ImageFont.load_default()
-        font_small = ImageFont.load_default()
     except:
         font = ImageFont.load_default()
-        font_small = ImageFont.load_default()
     
     # Scale bar
     bar_width = 100
     bar_kpc = (bar_width / w) * scale_kpc
     draw.rectangle([20, h-40, 20+bar_width, h-34], fill='black')
-    draw.text((20+35, h-55), f"{bar_kpc:.0f} kpc", fill='black', font=font_small)
+    draw.text((20+35, h-55), f"{bar_kpc:.0f} kpc", fill='black', font=font)
     
     # North indicator
     draw.line([w-30, 30, w-30, 60], fill='black', width=2)
@@ -158,27 +144,41 @@ def add_annotations(image_array, metadata, scale_kpc=100, title="After"):
     # Info box
     info_lines = [
         f"Ω = {metadata.get('omega',0):.2f} | Fringe = {metadata.get('fringe',0)}",
-        f"γ→A' Signal: {metadata.get('signal',0):.1f}% | Mixing: {metadata.get('mixing',0):.3f}"
+        f"γ→A' Signal: {metadata.get('signal',0):.1f}%"
     ]
-    draw.rectangle([12, 12, 280, 12 + len(info_lines) * 22 + 8], fill=(255,255,255,200), outline='black')
+    draw.rectangle([12, 12, 250, 12 + len(info_lines) * 22 + 8], fill=(255,255,255,200), outline='black')
     for i, line in enumerate(info_lines):
-        draw.text((18, 18 + i * 22), line, fill='#1e3a5f', font=font_small)
+        draw.text((18, 18 + i * 22), line, fill='#1e3a5f', font=font)
     
     draw.text((w//2 - 80, 10), title, fill='#1e3a5f', font=font)
     
     return np.array(img_pil) / 255.0
 
 
+# ── PLOTTING HELPER ─────────────────────────────────────────────
+def display_image(img, title=None, cmap=None, figsize=(5, 5)):
+    """Reliable image display"""
+    fig, ax = plt.subplots(figsize=figsize)
+    if len(img.shape) == 3:
+        ax.imshow(np.clip(img, 0, 1))
+    else:
+        ax.imshow(img, cmap=cmap, vmin=0, vmax=1)
+    if title:
+        ax.set_title(title, fontsize=10)
+    ax.axis('off')
+    fig.tight_layout()
+    st.pyplot(fig)
+    plt.close(fig)
+
+
 # ── SIDEBAR ─────────────────────────────────────────────
 with st.sidebar:
-    st.title("🔭 QCAUS v13.0")
-    st.markdown("*Complete Unified Suite*")
+    st.title("🔭 QCAUS v14.0")
+    st.markdown("*Fixed Display*")
     st.markdown("---")
     
     # Upload section
-    st.markdown("### 📁 Upload Image")
-    st.markdown('<div class="upload-area">📤 Drag & drop or click to browse</div>', unsafe_allow_html=True)
-    uploaded = st.file_uploader("", type=['fits', 'png', 'jpg', 'jpeg'], label_visibility="collapsed")
+    uploaded = st.file_uploader("📁 Upload Image", type=['fits', 'png', 'jpg', 'jpeg'])
     
     st.markdown("---")
     st.markdown("### ⚛️ FDM Parameters")
@@ -198,21 +198,18 @@ with st.sidebar:
     epsilon = st.slider("Kinetic Mixing ε", 1e-12, 1e-8, 1e-10, format="%.1e")
     
     st.markdown("---")
-    
-    # Derived quantities
     lambda_fringe = 3.142 * (200 / delta_v) * (1.0 / m_fdm)
     rho_c = 1.9e7 * m_fdm**2
     q_pd = 2 * epsilon_fdm * omega / (1 + (epsilon_fdm * omega)**2)
     
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     with col1:
         st.metric("Fringe λ", f"{lambda_fringe:.2f} kpc")
-    with col2:
         st.metric("Core ρ_c", f"{rho_c:.2e} M☉/kpc³")
-    with col3:
+    with col2:
         st.metric("P-D Q", f"{q_pd:.3f}")
     
-    st.caption("Tony Ford | QCAUS v13.0")
+    st.caption("Tony Ford | QCAUS v14.0")
 
 
 # ── MAIN APP ─────────────────────────────────────────────
@@ -226,7 +223,7 @@ if uploaded is not None:
         img_data = load_image(uploaded)
         st.success(f"✅ Loaded: {uploaded.name}")
 else:
-    # Generate sample image
+    # Generate sample
     size = 400
     img_data = np.zeros((size, size))
     cx, cy = size//2, size//2
@@ -238,7 +235,7 @@ else:
     img_data = (img_data - img_data.min()) / (img_data.max() - img_data.min())
     st.info("📸 Using sample image. Upload your own to analyze.")
 
-# Generate physics layers
+# Generate layers
 size = img_data.shape[0]
 soliton = fdm_soliton_2d(size, m_fdm * 1e-22)
 dark_photon = dark_photon_wave(size, fringe)
@@ -260,14 +257,11 @@ rgb_composite = np.stack([
 ], axis=-1)
 rgb_composite = np.clip(rgb_composite, 0, 1)
 
-# ── BEFORE / AFTER SIDE-BY-SIDE ─────────────────────────────────────────────
+# ── BEFORE / AFTER ─────────────────────────────────────────────
 st.markdown("### 📊 Before vs After")
 
-before_metadata = {'omega': omega, 'fringe': fringe, 'signal': 0, 'mixing': 0}
-before_annotated = add_annotations(img_data, before_metadata, scale_kpc, "Before: Standard View")
-
-after_metadata = {'omega': omega, 'fringe': fringe, 'signal': conversion_conf, 'mixing': mixing}
-after_annotated = add_annotations(rgb_composite, after_metadata, scale_kpc, "After: PDP Entangled + γ→A' Signal")
+before_annotated = add_annotations(img_data, {'omega': omega, 'fringe': fringe, 'signal': 0}, scale_kpc, "Before")
+after_annotated = add_annotations(rgb_composite, {'omega': omega, 'fringe': fringe, 'signal': conversion_conf}, scale_kpc, "After")
 
 col_before, col_after = st.columns(2)
 with col_before:
@@ -282,25 +276,19 @@ st.markdown("---")
 # ── FDM DERIVATION VISUALIZATIONS ─────────────────────────────────────────────
 st.markdown("### 🌊 FDM Derivation Visualizations")
 
+# Row 1
 col1, col2 = st.columns(2)
 
 with col1:
-    # Wave Interference Pattern
-    fig, ax = plt.subplots(figsize=(6, 5))
-    im = ax.imshow(interference, cmap='plasma', vmin=0, vmax=1)
-    ax.set_title(f"PDP Interference Pattern\nλ = {lambda_fringe:.2f} kpc", fontsize=10)
-    ax.axis('off')
-    plt.colorbar(im, ax=ax, fraction=0.046)
-    st.pyplot(fig)
-    plt.close(fig)
+    display_image(interference, "PDP Interference Pattern", 'plasma', (5, 5))
     st.caption("ρ = |ψ₁|² + |ψ₂|² + 2Re(ψ₁*ψ₂ e^{iΔφ}) | λ = h/(mΔv)")
 
 with col2:
-    # Solitonic Core Profile
+    # Soliton profile plot
     r = np.linspace(0, 5, 500)
-    soliton_profile = fdm_soliton_profile(r, m_fdm * 1e-22)
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(r, soliton_profile, 'r-', linewidth=2)
+    profile = fdm_soliton_profile(r, m_fdm * 1e-22)
+    fig, ax = plt.subplots(figsize=(5, 4))
+    ax.plot(r, profile, 'r-', linewidth=2)
     ax.set_xlabel("r (kpc)")
     ax.set_ylabel("ρ(r) / ρ₀")
     ax.set_title(f"FDM Soliton Core | m = {m_fdm}×10⁻²² eV")
@@ -309,29 +297,22 @@ with col2:
     plt.close(fig)
     st.caption("ρ(r) = ρ₀ [sin(kr)/(kr)]² | Ground state of Schrödinger-Poisson")
 
-# Second row
+# Row 2
 col3, col4 = st.columns(2)
 
 with col3:
-    # 2D Soliton Map
-    fig, ax = plt.subplots(figsize=(6, 5))
-    im = ax.imshow(soliton, cmap='hot', extent=[-2.5, 2.5, -2.5, 2.5])
-    ax.set_title("FDM Soliton Core (2D)", fontsize=10)
-    ax.set_xlabel("kpc")
-    ax.set_ylabel("kpc")
-    plt.colorbar(im, ax=ax, fraction=0.046, label="Density")
-    st.pyplot(fig)
-    plt.close(fig)
+    display_image(soliton, "FDM Soliton Core (2D)", 'hot', (5, 5))
+    st.caption(f"Core density: {rho_c:.2e} M☉/kpc³")
 
 with col4:
-    # Parameter Sweep
-    fig, ax = plt.subplots(figsize=(6, 4))
+    # Parameter sweep plot
+    fig, ax = plt.subplots(figsize=(5, 4))
     masses = [0.5, 1.0, 2.0, 3.0, 4.0]
     colors = ['blue', 'cyan', 'green', 'orange', 'red']
     r_sweep = np.linspace(0, 3, 200)
     for i, m in enumerate(masses):
-        profile = fdm_soliton_profile(r_sweep, m * 1e-22)
-        ax.plot(r_sweep, profile, color=colors[i], linewidth=2, label=f'm={m}')
+        prof = fdm_soliton_profile(r_sweep, m * 1e-22)
+        ax.plot(r_sweep, prof, color=colors[i], linewidth=2, label=f'{m}')
     ax.set_xlabel("r (kpc)")
     ax.set_ylabel("ρ(r) / ρ₀")
     ax.set_title("Soliton Size vs FDM Mass")
@@ -339,34 +320,23 @@ with col4:
     ax.grid(True, alpha=0.3)
     st.pyplot(fig)
     plt.close(fig)
+    st.caption("Lighter FDM mass = larger soliton core")
 
 st.markdown("---")
 
 # ── ALL PHYSICS OUTPUTS ─────────────────────────────────────────────
-st.markdown("### 📊 All Physics Outputs")
-
-col_a, col_b, col_c = st.columns(3)
-
-def show_img(img, title, cmap='gray'):
-    fig, ax = plt.subplots(figsize=(3, 3))
-    if len(img.shape) == 3:
-        ax.imshow(np.clip(img, 0, 1))
-    else:
-        ax.imshow(img, cmap=cmap, vmin=0, vmax=1)
-    ax.set_title(title, fontsize=8)
-    ax.axis('off')
-    st.pyplot(fig)
-    plt.close(fig)
-
-with col_a:
-    show_img(img_data, "Original", 'gray')
-    show_img(soliton, "FDM Soliton", 'hot')
-with col_b:
-    show_img(dark_photon, "Dark Photon Field", 'plasma')
-    show_img(interference, "PDP Interference", 'plasma')
-with col_c:
-    show_img(pdp_result, "PDP Entangled", 'inferno')
-    show_img(conversion_signal, "γ→A' Signal", 'hot')
+with st.expander("📊 View All Physics Outputs", expanded=False):
+    col_a, col_b, col_c = st.columns(3)
+    
+    with col_a:
+        display_image(img_data, "Original", 'gray', (3, 3))
+        display_image(soliton, "FDM Soliton", 'hot', (3, 3))
+    with col_b:
+        display_image(dark_photon, "Dark Photon Field", 'plasma', (3, 3))
+        display_image(interference, "PDP Interference", 'plasma', (3, 3))
+    with col_c:
+        display_image(pdp_result, "PDP Entangled", 'inferno', (3, 3))
+        display_image(conversion_signal, "γ→A' Signal", 'hot', (3, 3))
 
 # ── METRICS ─────────────────────────────────────────────
 st.markdown("---")
@@ -382,7 +352,6 @@ with col_m3:
 with col_m4:
     st.metric("Mixing Angle", f"{mixing:.3f}")
 
-# Signal Alert
 if conversion_conf > 50:
     st.error(f"🕳️ **STRONG DARK PHOTON CONVERSION SIGNAL** – {conversion_conf:.0f}% confidence")
 elif conversion_conf > 20:
@@ -394,13 +363,7 @@ else:
 st.markdown("---")
 st.markdown("### 💾 Download Results")
 
-def save_fig(fig):
-    buf = io.BytesIO()
-    fig.savefig(buf, format='png', bbox_inches='tight')
-    buf.seek(0)
-    return buf.getvalue()
-
-def save_array(arr, cmap='inferno'):
+def array_to_bytes(arr, cmap='inferno'):
     fig, ax = plt.subplots(figsize=(6, 6))
     if len(arr.shape) == 3:
         ax.imshow(np.clip(arr, 0, 1))
@@ -412,29 +375,27 @@ def save_array(arr, cmap='inferno'):
     plt.close(fig)
     return buf.getvalue()
 
-def save_side_by_side():
+def side_by_side_bytes():
     combined = np.hstack([before_annotated, after_annotated])
-    return save_array(combined)
+    return array_to_bytes(combined)
 
 col_d1, col_d2, col_d3, col_d4 = st.columns(4)
 with col_d1:
-    st.download_button("📸 Before/After", save_side_by_side(), "before_after.png")
+    st.download_button("📸 Before/After", side_by_side_bytes(), "before_after.png")
 with col_d2:
-    st.download_button("🌊 Interference", save_array(interference, 'plasma'), "interference.png")
+    st.download_button("🌊 Interference", array_to_bytes(interference, 'plasma'), "interference.png")
 with col_d3:
-    st.download_button("🕳️ γ→A' Signal", save_array(conversion_signal, 'hot'), "dark_photon_signal.png")
+    st.download_button("🕳️ γ→A' Signal", array_to_bytes(conversion_signal, 'hot'), "dark_photon_signal.png")
 with col_d4:
-    st.download_button("⭐ FDM Soliton", save_array(soliton, 'hot'), "soliton.png")
+    st.download_button("⭐ FDM Soliton", array_to_bytes(soliton, 'hot'), "soliton.png")
 
 # ── EQUATIONS ─────────────────────────────────────────────
 with st.expander("📚 FDM Derivation Equations", expanded=False):
-    st.latex(r"S = \int d^4x \sqrt{-g} \left[\frac{1}{2}g^{\mu\nu}\partial_\mu\phi\partial_\nu\phi - \frac{1}{2}m^2\phi^2\right] + S_{\text{gravity}}")
-    st.latex(r"\Box\phi + m^2\phi = 0")
-    st.latex(r"\phi(x,t) = \frac{1}{\sqrt{2m}}\left[\psi(x,t)e^{-imt} + \psi^*(x,t)e^{imt}\right]")
-    st.latex(r"i\partial_t\psi = -\frac{1}{2m}\nabla^2\psi + m\Phi\psi")
-    st.latex(r"\nabla^2\Phi = 4\pi G\rho = 4\pi G|\psi|^2")
-    st.latex(r"\rho = |\psi_1|^2 + |\psi_2|^2 + 2\Re(\psi_1^*\psi_2 e^{i\Delta\phi})")
-    st.latex(r"\lambda = \frac{2\pi}{|\Delta k|} \approx \frac{h}{m\Delta v}")
+    st.latex(r"\rho(r) = \rho_0 \left[\frac{\sin(kr)}{kr}\right]^2")
+    st.latex(r"\lambda = \frac{h}{m \Delta v}")
+    st.latex(r"i\partial_t\psi = -\frac{1}{2m}\nabla^2\psi + \Phi\psi")
+    st.latex(r"\nabla^2\Phi = 4\pi G|\psi|^2")
+    st.latex(r"P(\gamma \to A') = \left(\frac{\varepsilon B}{m'}\right)^2 \sin^2\left(\frac{m'^2 L}{4\omega}\right)")
 
 st.markdown("---")
-st.markdown("⚡ **QCAUS v13.0** | Complete Unified Suite | Drag & Drop | Before/After | FDM Derivation | Tony Ford Model")
+st.markdown("⚡ **QCAUS v14.0** | Fixed Display | Drag & Drop | Before/After | FDM Derivation | Tony Ford Model")

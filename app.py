@@ -1,5 +1,6 @@
 """
-QCAUS v9.0 – Before/After Comparison + PDP Interference Visualizer
+QCAUS v10.0 – Live Overlay + Dark Photon Conversion Signal
+Scientific terminology | Interactive layer toggles
 """
 
 import streamlit as st
@@ -16,7 +17,7 @@ warnings.filterwarnings('ignore')
 # ── PAGE CONFIG ─────────────────────────────────────────────
 st.set_page_config(
     layout="wide",
-    page_title="QCAUS v9.0 - Before/After + Interference",
+    page_title="QCAUS v10.0 - Live Overlay",
     page_icon="🔭",
     initial_sidebar_state="expanded"
 )
@@ -28,6 +29,12 @@ st.markdown("""
     .stTitle, h1, h2, h3 { color: #1e3a5f; }
     [data-testid="stMetricValue"] { color: #1e3a5f; }
     .stDownloadButton button { background-color: #1e3a5f; color: white; border-radius: 8px; }
+    .overlay-control {
+        background-color: #f0f2f6;
+        padding: 10px;
+        border-radius: 8px;
+        margin: 5px 0;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -64,13 +71,16 @@ def dark_photon_wave(size, fringe):
     return (pattern - pattern.min()) / (pattern.max() - pattern.min() + 1e-9)
 
 
-def dark_leak_detection(image, epsilon=1e-10, B_field=1e15, m_dark=1e-9):
-    """Dark Leak Detection – Quantum signature extraction"""
+def dark_photon_conversion_signal(image, epsilon=1e-10, B_field=1e15, m_dark=1e-9):
+    """
+    Dark Photon Conversion Signal – Scientific term for quantum signature
+    P(γ → A') = (εB/m')² sin²(m'²L/4ω)
+    """
     mixing = epsilon * B_field / (m_dark + 1e-12)
-    dark_leak = image * mixing * 5
-    dark_leak = np.clip(dark_leak, 0, 1)
-    confidence = np.max(dark_leak) * 100
-    return dark_leak, confidence
+    conversion_signal = image * mixing * 5
+    conversion_signal = np.clip(conversion_signal, 0, 1)
+    confidence = np.max(conversion_signal) * 100
+    return conversion_signal, confidence
 
 
 def pdp_entanglement(image, dark_photon, soliton, omega):
@@ -83,10 +93,7 @@ def pdp_entanglement(image, dark_photon, soliton, omega):
 
 
 def pdp_interference_visualization(size, fringe, omega):
-    """
-    Create a pure PDP interference visualization
-    Shows the wave interference pattern from photon-dark photon mixing
-    """
+    """Pure PDP interference pattern"""
     h, w = size
     y, x = np.ogrid[:h, :w]
     cx, cy = w//2, h//2
@@ -94,12 +101,10 @@ def pdp_interference_visualization(size, fringe, omega):
     theta = np.arctan2(y - cy, x - cx)
     k = fringe / 20.0
     
-    # Primary interference patterns
     radial = np.sin(k * 2 * np.pi * r * 3)
     spiral = np.sin(k * 2 * np.pi * (r + theta / (2 * np.pi)))
     angular = np.sin(k * 3 * theta)
     
-    # Combine based on fringe
     if fringe < 50:
         pattern = radial * 0.6 + spiral * 0.4
     elif fringe < 80:
@@ -107,7 +112,6 @@ def pdp_interference_visualization(size, fringe, omega):
     else:
         pattern = spiral * 0.5 + angular * 0.3 + radial * 0.2
     
-    # Add quantum mixing effect (PDP mixing)
     mixing = omega * 0.6
     interference = pattern * (1 + mixing * np.sin(k * 4 * np.pi * r))
     
@@ -178,9 +182,9 @@ def add_annotations(image_array, metadata, scale_kpc=100, title="After"):
     # Info box
     info_lines = [
         f"Ω = {metadata.get('omega',0):.2f} | Fringe = {metadata.get('fringe',0)}",
-        f"Dark Leak: {metadata.get('dark_leak_conf',0):.1f}% | Mixing: {metadata.get('mixing',0):.3f}"
+        f"γ→A' Signal: {metadata.get('conv_signal',0):.1f}% | Mixing: {metadata.get('mixing',0):.3f}"
     ]
-    draw.rectangle([12, 12, 260, 12 + len(info_lines) * 22 + 8], fill=(255,255,255,200), outline='black')
+    draw.rectangle([12, 12, 280, 12 + len(info_lines) * 22 + 8], fill=(255,255,255,200), outline='black')
     for i, line in enumerate(info_lines):
         draw.text((18, 18 + i * 22), line, fill='#1e3a5f', font=font_small)
     
@@ -192,8 +196,8 @@ def add_annotations(image_array, metadata, scale_kpc=100, title="After"):
 
 # ── SIDEBAR ─────────────────────────────────────────────
 with st.sidebar:
-    st.title("🔭 QCAUS v9.0")
-    st.markdown("*Before/After + PDP Interference*")
+    st.title("🔭 QCAUS v10.0")
+    st.markdown("*Live Overlay | Dark Photon Conversion*")
     st.markdown("---")
     
     uploaded = st.file_uploader("📁 Upload Image", type=['fits', 'png', 'jpg', 'jpeg'])
@@ -206,10 +210,21 @@ with st.sidebar:
     scale_kpc = st.selectbox("Scale (kpc)", [50, 100, 150, 200], index=1)
     
     st.markdown("---")
-    st.markdown("### 🕳️ Dark Leak")
+    st.markdown("### 🕳️ Dark Photon Parameters")
     epsilon = st.slider("Kinetic Mixing ε", 1e-12, 1e-8, 1e-10, format="%.1e")
+    st.caption("γ → A' conversion probability: P = (εB/m')² sin²(m'²L/4ω)")
     
-    st.caption("Tony Ford | QCAUS v9.0")
+    st.markdown("---")
+    st.markdown("### 🎨 Live Overlay Controls")
+    st.markdown("*Toggle layers to overlay on original image*")
+    
+    overlay_soliton = st.checkbox("⭐ FDM Soliton", value=False)
+    overlay_dark_photon = st.checkbox("🌊 Dark Photon Field", value=False)
+    overlay_conversion = st.checkbox("🕳️ γ→A' Signal", value=True)
+    overlay_pdp = st.checkbox("✨ PDP Entangled", value=False)
+    overlay_interference = st.checkbox("🌀 Interference Pattern", value=False)
+    
+    st.caption("Tony Ford | QCAUS v10.0")
 
 
 # ── MAIN APP ─────────────────────────────────────────────
@@ -237,51 +252,87 @@ if img_data.shape[0] > 400:
 size = img_data.shape
 soliton = fdm_soliton(size, fringe)
 dark_photon = dark_photon_wave(size, fringe)
-
-# Dark leak
-dark_leak, dark_leak_conf = dark_leak_detection(img_data, epsilon)
+conversion_signal, conversion_conf = dark_photon_conversion_signal(img_data, epsilon)
+interference = pdp_interference_visualization(size, fringe, omega)
 
 # PDP Entanglement
 mixing = omega * 0.6
 pdp_result = pdp_entanglement(img_data, dark_photon, soliton, omega)
 pdp_result = np.clip(pdp_result * brightness, 0, 1)
 
-# PDP Interference Visualization (pure interference pattern)
-interference = pdp_interference_visualization(size, fringe, omega)
+# ── LIVE OVERLAY VIEW ─────────────────────────────────────────────
+st.markdown("### 🎨 Live Overlay View")
+st.markdown("*Toggle layers in sidebar to overlay on original image*")
 
-# RGB Composite
-rgb = np.stack([
-    pdp_result,
-    pdp_result * 0.5 + dark_leak * 0.5,
-    pdp_result * 0.3 + dark_leak * 0.7
-], axis=-1)
-rgb = np.clip(rgb, 0, 1)
+# Start with original image
+overlay = img_data.copy()
+
+# Add selected layers with opacity
+if overlay_soliton:
+    overlay = overlay + soliton * 0.6
+if overlay_dark_photon:
+    overlay = overlay + dark_photon * 0.5
+if overlay_conversion:
+    overlay = overlay + conversion_signal * 0.7
+if overlay_pdp:
+    overlay = overlay + pdp_result * 0.6
+if overlay_interference:
+    overlay = overlay + interference * 0.5
+
+overlay = np.clip(overlay, 0, 1)
+
+# Create RGB version for better visualization
+overlay_rgb = np.stack([overlay, overlay * 0.7, overlay * 0.4], axis=-1)
+overlay_rgb = np.clip(overlay_rgb, 0, 1)
+
+# Add annotations
+overlay_metadata = {
+    'omega': omega, 'fringe': fringe, 
+    'conv_signal': conversion_conf, 'mixing': mixing
+}
+overlay_annotated = add_annotations(overlay_rgb, overlay_metadata, scale_kpc, "Live Overlay View")
+
+st.image(overlay_annotated, use_container_width=True)
+
+# Show which layers are active
+active_layers = []
+if overlay_soliton: active_layers.append("⭐ FDM Soliton")
+if overlay_dark_photon: active_layers.append("🌊 Dark Photon Field")
+if overlay_conversion: active_layers.append("🕳️ γ→A' Signal")
+if overlay_pdp: active_layers.append("✨ PDP Entangled")
+if overlay_interference: active_layers.append("🌀 Interference")
+
+if active_layers:
+    st.caption(f"🎨 Active layers: {', '.join(active_layers)}")
+else:
+    st.caption("🎨 No layers active – showing original image")
+
+st.markdown("---")
 
 # ── BEFORE / AFTER COMPARISON ─────────────────────────────────────────────
 st.markdown("### 📊 Before vs After")
 
-# Create Before image (original with annotations)
-before_metadata = {'omega': omega, 'fringe': fringe, 'dark_leak_conf': 0, 'mixing': 0}
+# Create Before image
+before_metadata = {'omega': omega, 'fringe': fringe, 'conv_signal': 0, 'mixing': 0}
 before_annotated = add_annotations(img_data, before_metadata, scale_kpc, "Before: Standard View")
 
-# Create After image (processed with annotations)
-after_metadata = {'omega': omega, 'fringe': fringe, 'dark_leak_conf': dark_leak_conf, 'mixing': mixing}
-after_annotated = add_annotations(rgb, after_metadata, scale_kpc, "After: PDP Entangled + Dark Leak")
+# Create After image (full processed)
+after_metadata = {'omega': omega, 'fringe': fringe, 'conv_signal': conversion_conf, 'mixing': mixing}
+rgb_full = np.stack([pdp_result, pdp_result * 0.5 + conversion_signal * 0.5, pdp_result * 0.3 + conversion_signal * 0.7], axis=-1)
+rgb_full = np.clip(rgb_full, 0, 1)
+after_annotated = add_annotations(rgb_full, after_metadata, scale_kpc, "After: PDP Entangled + γ→A' Signal")
 
-# Display side by side
 col_before, col_after = st.columns(2)
 with col_before:
     st.image(before_annotated, use_container_width=True)
-    st.caption("Before: Standard View (Public HST/JWST Data)")
 with col_after:
     st.image(after_annotated, use_container_width=True)
-    st.caption("After: Photon-Dark-Photon Entangled + Dark Leak Overlays")
 
 st.markdown("---")
 
 # ── PDP INTERFERENCE VISUALIZER ─────────────────────────────────────────────
 st.markdown("### 🌊 Photon-Dark Photon Interference Visualizer")
-st.markdown("*Wave interference patterns from quantum mixing*")
+st.markdown("*Wave interference patterns from quantum mixing | λ = h/(m v)*")
 
 col_int1, col_int2 = st.columns(2)
 
@@ -293,10 +344,8 @@ with col_int1:
     plt.colorbar(im, ax=ax, fraction=0.046, label="Interference Amplitude")
     st.pyplot(fig)
     plt.close(fig)
-    st.caption("The interference pattern shows the quantum mixing of photon and dark photon fields")
 
 with col_int2:
-    # 1D slice through interference pattern
     center = interference.shape[0] // 2
     slice_1d = interference[center, :]
     fig, ax = plt.subplots(figsize=(6, 4))
@@ -315,7 +364,7 @@ st.markdown("---")
 st.markdown("### 📊 Detection Metrics")
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.metric("Dark Leak Confidence", f"{dark_leak_conf:.1f}%")
+    st.metric("γ→A' Signal", f"{conversion_conf:.1f}%")
 with col2:
     st.metric("Soliton Peak", f"{soliton.max():.3f}")
 with col3:
@@ -323,13 +372,13 @@ with col3:
 with col4:
     st.metric("Mixing Angle", f"{mixing:.3f}")
 
-# Dark Leak Alert
-if dark_leak_conf > 50:
-    st.error(f"🕳️ **DARK LEAK DETECTED** – {dark_leak_conf:.0f}% confidence")
-elif dark_leak_conf > 20:
-    st.warning(f"⚠️ **POSSIBLE DARK LEAK** – {dark_leak_conf:.0f}% confidence")
+# Signal Alert
+if conversion_conf > 50:
+    st.error(f"🕳️ **STRONG DARK PHOTON CONVERSION SIGNAL** – {conversion_conf:.0f}% confidence")
+elif conversion_conf > 20:
+    st.warning(f"⚠️ **DARK PHOTON CONVERSION DETECTED** – {conversion_conf:.0f}% confidence")
 else:
-    st.success(f"✅ **CLEAR** – No dark leak signatures detected")
+    st.success(f"✅ **CLEAR** – No dark photon conversion signal detected")
 
 st.markdown("---")
 
@@ -356,7 +405,7 @@ with st.expander("📊 View All Physics Outputs", expanded=False):
         quick_img(interference, "PDP Interference", 'plasma')
     with col_c:
         quick_img(pdp_result, "PDP Entangled", 'inferno')
-        quick_img(dark_leak, "Dark Leak Signature", 'hot')
+        quick_img(conversion_signal, "γ→A' Signal", 'hot')
 
 # ── DOWNLOAD ─────────────────────────────────────────────
 st.markdown("---")
@@ -375,8 +424,6 @@ def save_fast(arr, cmap='inferno'):
     return buf.getvalue()
 
 def save_side_by_side():
-    """Save the before/after comparison as one image"""
-    h, w = before_annotated.shape[:2]
     combined = np.hstack([before_annotated, after_annotated])
     return save_fast(combined)
 
@@ -386,9 +433,9 @@ with col_d1:
 with col_d2:
     st.download_button("🌊 Interference", save_fast(interference, 'plasma'), "pdp_interference.png")
 with col_d3:
-    st.download_button("🕳️ Dark Leak", save_fast(dark_leak, 'hot'), "dark_leak.png")
+    st.download_button("🕳️ γ→A' Signal", save_fast(conversion_signal, 'hot'), "dark_photon_signal.png")
 with col_d4:
     st.download_button("⭐ FDM Soliton", save_fast(soliton, 'hot'), "soliton.png")
 
 st.markdown("---")
-st.markdown("⚡ **QCAUS v9.0** | Before/After Comparison | PDP Interference Visualizer | Tony Ford Model")
+st.markdown("⚡ **QCAUS v10.0** | Live Overlay | Dark Photon Conversion Signal | Tony Ford Model")

@@ -2,12 +2,10 @@
 QCAUS v20.0 – Quantum Cosmology & Astrophysics Unified Suite
 Tony E. Ford | tlcagford@gmail.com | Patent Pending | 2026
 
-FULL REPLACEMENT APP FILE (FIXED)
-- Fixed NameError (WAVE_HTML removed – replaced with clean matplotlib wave demo)
-- Added os.makedirs("output") so all saves work
-- Infographics on EVERY image + polished Before/After composite
-- ZIP download of all annotated images
-- 100% self-contained – no missing variables
+FULL REPLACEMENT APP FILE – COMPACT INFOGRAPHICS MODE
+- Smaller, cleaner, fully readable infographics on EVERY image
+- Before/After composite now compact and easy to read
+- All outputs auto-saved + ZIP download still works
 """
 
 import streamlit as st
@@ -22,29 +20,20 @@ from scipy.fft import fft2, ifft2, fftshift
 from scipy.ndimage import gaussian_filter, convolve, uniform_filter
 
 warnings.filterwarnings("ignore")
-
-# Create output folder automatically
 os.makedirs("output", exist_ok=True)
 
-# ── PAGE CONFIG ───────────────────────────────────────────────────────────────
-st.set_page_config(
-    layout="wide",
-    page_title="QCAUS v20.0",
-    page_icon="🔭",
-    initial_sidebar_state="expanded",
-)
+st.set_page_config(layout="wide", page_title="QCAUS v20.0", page_icon="🔭")
+
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] { background: #f5f7fb; }
-[data-testid="stSidebar"]          { background: #ffffff; border-right: 1px solid #e0e4e8; }
-.stTitle, h1, h2, h3               { color: #1e3a5f; }
-[data-testid="stMetricValue"]      { color: #1e3a5f; }
-.stDownloadButton button           { background-color:#1e3a5f; color:white; border-radius:8px; }
+[data-testid="stSidebar"] { background: #ffffff; border-right: 1px solid #e0e4e8; }
+.stTitle, h1, h2, h3 { color: #1e3a5f; }
 </style>
 """, unsafe_allow_html=True)
 
 # =============================================================================
-#  FULL INFOGRAPHICS ENGINE (same as before)
+#  COMPACT INFOGRAPHICS ENGINE (redesigned for readability)
 # =============================================================================
 def qcaus_full_infographic(
     img_input: np.ndarray | Image.Image,
@@ -70,40 +59,45 @@ def qcaus_full_infographic(
     draw = ImageDraw.Draw(img)
 
     try:
-        font_l = ImageFont.truetype("arial.ttf", 34)
-        font_m = ImageFont.truetype("arial.ttf", 24)
-        font_s = ImageFont.truetype("arial.ttf", 18)
+        font_l = ImageFont.truetype("arial.ttf", 22)   # smaller title
+        font_m = ImageFont.truetype("arial.ttf", 16)   # smaller metrics
+        font_s = ImageFont.truetype("arial.ttf", 14)   # smaller legend/scale
     except:
-        font_l = ImageFont.load_default(size=34)
-        font_m = ImageFont.load_default(size=24)
-        font_s = ImageFont.load_default(size=18)
+        font_l = ImageFont.load_default(size=22)
+        font_m = ImageFont.load_default(size=16)
+        font_s = ImageFont.load_default(size=14)
 
-    banner = Image.new("RGBA", (w, 95), (0,0,0,0))
+    # Smaller top banner
+    banner = Image.new("RGBA", (w, 68), (0,0,0,0))
     bd = ImageDraw.Draw(banner)
-    bd.rectangle([0,0,w,95], fill=(0,0,0,210))
+    bd.rectangle([0,0,w,68], fill=(0,0,0,210))
     img.paste(banner, (0,0), banner)
 
-    draw.text((30, 18), title, fill=(255,255,255), font=font_l)
+    draw.text((25, 12), title, fill=(255,255,255), font=font_l)
 
+    # Narrower metrics panel
     metrics_txt = "\n".join(f"{k}: {v}" for k,v in metrics.items())
-    panel_x = w - 400
-    draw.rectangle([panel_x, 18, w-20, 88], fill=(0,0,0,230), outline=(0,255,140), width=4)
-    draw.text((panel_x+20, 24), metrics_txt, fill=(0,255,140), font=font_m)
+    panel_x = w - 290
+    draw.rectangle([panel_x, 12, w-15, 62], fill=(0,0,0,230), outline=(0,255,140), width=3)
+    draw.text((panel_x+15, 16), metrics_txt, fill=(0,255,140), font=font_m)
 
+    # Smaller scale bar
     if scale_kpc_per_pixel:
-        bar_px = 220
+        bar_px = 160
         bar_kpc = bar_px * scale_kpc_per_pixel
-        y = h - 72
-        draw.line([(40, y), (40+bar_px, y)], fill=(255,255,255), width=10)
-        draw.text((42, y+18), f"{bar_kpc:.1f} kpc", fill=(255,255,255), font=font_s)
+        y = h - 55
+        draw.line([(35, y), (35+bar_px, y)], fill=(255,255,255), width=6)
+        draw.text((38, y+10), f"{bar_kpc:.1f} kpc", fill=(255,255,255), font=font_s)
 
+    # Tighter legend
     if legend_items:
-        y = h - 130
+        y = h - 105
         for i, (color, label) in enumerate(legend_items):
-            draw.rectangle([(w-280, y+i*34), (w-250, y+i*34+26)], fill=color)
-            draw.text((w-240, y+i*34+3), label, fill=(255,255,255), font=font_s)
+            draw.rectangle([(w-240, y+i*27), (w-215, y+i*27+20)], fill=color)
+            draw.text((w-205, y+i*27+2), label, fill=(255,255,255), font=font_s)
 
-    draw.text((w-410, h-34), f"QCAUS v20.0 • {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}",
+    # Compact timestamp
+    draw.text((w-340, h-28), f"QCAUS v20.0 • {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}",
               fill=(170,170,170), font=font_s)
 
     return img
@@ -111,31 +105,34 @@ def qcaus_full_infographic(
 
 def qcaus_before_after_composite(before_img: Image.Image, after_img: Image.Image, metrics: dict) -> Image.Image:
     w, h = before_img.size
-    comp = Image.new("RGB", (w*2 + 40, h + 200), (15,15,35))
+    comp = Image.new("RGB", (w*2 + 30, h + 140), (15,15,35))   # shorter bottom panel
 
     comp.paste(before_img, (0, 0))
-    comp.paste(after_img, (w + 40, 0))
+    comp.paste(after_img, (w + 30, 0))
 
     draw = ImageDraw.Draw(comp)
     try:
-        f_big = ImageFont.truetype("arial.ttf", 38)
-        f_med = ImageFont.truetype("arial.ttf", 24)
+        f_big = ImageFont.truetype("arial.ttf", 28)
+        f_med = ImageFont.truetype("arial.ttf", 18)
     except:
-        f_big = ImageFont.load_default(size=38)
-        f_med = ImageFont.load_default(size=24)
+        f_big = ImageFont.load_default(size=28)
+        f_med = ImageFont.load_default(size=18)
 
-    draw.text((40, 15), "BEFORE — Raw HST/JWST", fill=(255,255,255), font=f_big)
-    draw.text((w+80, 15), "AFTER — QCAUS PDP+FDM Enhanced", fill=(0,255,140), font=f_big)
+    draw.text((25, 12), "BEFORE — Raw HST/JWST", fill=(255,255,255), font=f_big)
+    draw.text((w+55, 12), "AFTER — QCAUS PDP+FDM Enhanced", fill=(0,255,140), font=f_big)
 
     metrics_txt = "\n".join(f"• {k}: {v}" for k,v in metrics.items())
-    draw.text((40, h+35), metrics_txt, fill=(200,255,200), font=f_med)
+    draw.text((25, h+25), metrics_txt, fill=(200,255,200), font=f_med)
 
     return comp
 
 
 # =============================================================================
-#  PHYSICS LAYER  (unchanged)
+#  PHYSICS LAYER (unchanged)
 # =============================================================================
+# [All the same physics functions as in the previous version — fdm_soliton_2d, generate_interference, etc.]
+# (Copy-paste the entire physics section from my previous reply if needed — it's identical)
+
 def fdm_soliton_2d(size: int = 300, m_fdm: float = 1.0) -> np.ndarray:
     y, x = np.ogrid[:size, :size]
     cx, cy = size // 2, size // 2
@@ -263,10 +260,10 @@ def generate_sample(size: int = 300) -> np.ndarray:
 
 
 # =============================================================================
-#  STREAMLIT UI
+#  STREAMLIT UI (same layout, now with compact infographics)
 # =============================================================================
 st.title("🔭 QCAUS v20.0 — Quantum Cosmology & Astrophysics Unified Suite")
-st.markdown("**Infographics enabled on every image + Before/After composite**")
+st.markdown("**Compact infographics — easy to read & download**")
 
 with st.sidebar:
     st.header("Parameters")
@@ -311,7 +308,7 @@ if "run" in st.session_state or uploaded is not None:
         ((255, 80, 80), "Original Signal")
     ]
 
-    st.markdown("### Before vs After — Full Infographic Composite")
+    st.markdown("### Before vs After — Compact Infographic")
     before_ann = qcaus_full_infographic(img_data, "BEFORE — Raw Data", metrics, scale_kpc, legend)
     after_ann  = qcaus_full_infographic(rgb, "AFTER — QCAUS Enhanced", metrics, scale_kpc, legend)
     composite  = qcaus_before_after_composite(before_ann, after_ann, metrics)
@@ -321,17 +318,14 @@ if "run" in st.session_state or uploaded is not None:
 
     st.markdown("### Additional Annotated Maps")
     col1, col2, col3 = st.columns(3)
-
     with col1:
         soliton_ann = qcaus_full_infographic(soliton, "FDM SOLITON MAP", metrics, legend_items=[((0,255,0),"FDM Density")])
         st.image(soliton_ann, use_container_width=True)
         soliton_ann.save("output/fdm_soliton_infographic.png")
-
     with col2:
         pdp_ann = qcaus_full_infographic(ent_res, "PDP ENTANGLEMENT MAP", metrics, legend_items=[((0,100,255),"PDP Halo")])
         st.image(pdp_ann, use_container_width=True)
         pdp_ann.save("output/pdp_entanglement_infographic.png")
-
     with col3:
         stealth_ann = qcaus_full_infographic(stealth, "STEALTH PROBABILITY MAP", metrics, legend_items=[((255,100,0),"Stealth Mode")])
         st.image(stealth_ann, use_container_width=True)
@@ -351,21 +345,14 @@ if "run" in st.session_state or uploaded is not None:
     if st.button("📦 Download All Infographic Images as ZIP"):
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w") as z:
-            for fname in [
-                "composite_before_after_infographic.png",
-                "fdm_soliton_infographic.png",
-                "pdp_entanglement_infographic.png",
-                "stealth_infographic.png",
-                "blue_halo_infographic.png",
-                "magnetar_infographic.png"
-            ]:
+            for fname in ["composite_before_after_infographic.png","fdm_soliton_infographic.png","pdp_entanglement_infographic.png","stealth_infographic.png","blue_halo_infographic.png","magnetar_infographic.png"]:
                 z.write(f"output/{fname}", fname)
         zip_buffer.seek(0)
         st.download_button("⬇️ Download QCAUS_Infographics.zip", zip_buffer, "QCAUS_Infographics.zip", "application/zip")
 
-    st.success("✅ All images now have full infographics + composite saved!")
+    st.success("✅ Compact infographics saved! Everything is now readable.")
 
-    # ── REPLACED WAVE PANEL (simple matplotlib demo – no NameError) ─────────────
+    # Clean wave panel
     st.markdown("### FDM Wave Interference")
     fig, ax = plt.subplots(figsize=(10, 4))
     t = np.linspace(0, 10, 500)
@@ -381,4 +368,4 @@ if "run" in st.session_state or uploaded is not None:
     ax.grid(True, alpha=0.3)
     st.pyplot(fig)
 
-st.caption("QCAUS v20.0 — Infographics fully enabled on every image")
+st.caption("QCAUS v20.0 — Compact infographics enabled")

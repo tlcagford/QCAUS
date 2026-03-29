@@ -5,3 +5,5 @@ matplotlib
 pandas
 plotly
 sympy
+astropy
+pydicom

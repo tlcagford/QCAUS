@@ -2,11 +2,13 @@
 QCAUS v20.0 – Quantum Cosmology & Astrophysics Unified Suite
 Tony E. Ford | tlcagford@gmail.com | Patent Pending | 2026
 
-FINAL FIXED VERSION
-- NO top crowding (extra padding + titles above images)
-- Beautiful vibrant wave colors + glow restored
-- Clean legend + perfect composite layout
-- Auto-runs on drag & drop
+FINAL COMPLETE VERSION
+- Drag & drop is first thing you see
+- Auto-runs instantly when you drop an image
+- No top crowding on Before/After
+- Beautiful bright green FDM soliton on AFTER image
+- Vibrant glowing wave animation
+- All functions included — no NameError
 """
 
 import streamlit as st
@@ -39,15 +41,14 @@ st.markdown("""
 def add_fdm_green_overlay(base_img: Image.Image, soliton: np.ndarray) -> Image.Image:
     arr = np.array(base_img).copy()
     green = np.zeros((soliton.shape[0], soliton.shape[1], 3), dtype=np.uint8)
-    green[..., 1] = (soliton * 255 * 1.3).clip(0, 255)   # brighter green
+    green[..., 1] = (soliton * 255 * 1.3).clip(0, 255)
     mask = (soliton > 0.15)[..., None]
     arr = np.where(mask, np.clip(arr * 0.65 + green * 1.1, 0, 255).astype(np.uint8), arr)
     return Image.fromarray(arr)
 
 def qcaus_before_after_composite(before_img: Image.Image, after_img: Image.Image, metrics: dict) -> Image.Image:
     w, h = before_img.size
-    comp = Image.new("RGB", (w*2 + 30, h + 280), (15,15,35))   # extra height = no crowding
-
+    comp = Image.new("RGB", (w*2 + 30, h + 280), (15,15,35))
     comp.paste(before_img, (0, 85))
     comp.paste(after_img, (w + 30, 85))
 
@@ -59,31 +60,25 @@ def qcaus_before_after_composite(before_img: Image.Image, after_img: Image.Image
         f_big = ImageFont.load_default(size=34)
         f_med = ImageFont.load_default(size=20)
 
-    # Clean titles above images
     draw.text((30, 22), "BEFORE — Raw HST/JWST", fill=(255,255,255), font=f_big)
     draw.text((w + 60, 22), "AFTER — QCAUS PDP+FDM Enhanced", fill=(0,255,140), font=f_big)
 
-    # Metrics
     metrics_txt = "\n".join(f"• {k}: {v}" for k,v in metrics.items())
     draw.text((30, h + 105), metrics_txt, fill=(200,255,200), font=f_med)
 
-    # Sharp vibrant legend
     legend_y = h + 175
-    draw.rectangle([(30, legend_y), (58, legend_y+26)], fill=(0,255,0))      # bright green
+    draw.rectangle([(30, legend_y), (58, legend_y+26)], fill=(0,255,0))
     draw.text((70, legend_y+3), "FDM Soliton", fill=(255,255,255), font=f_med)
-    draw.rectangle([(240, legend_y), (268, legend_y+26)], fill=(0,130,255))  # vivid blue
+    draw.rectangle([(240, legend_y), (268, legend_y+26)], fill=(0,130,255))
     draw.text((280, legend_y+3), "PDP Entanglement", fill=(255,255,255), font=f_med)
-    draw.rectangle([(450, legend_y), (478, legend_y+26)], fill=(255,60,60))  # strong red
+    draw.rectangle([(450, legend_y), (478, legend_y+26)], fill=(255,60,60))
     draw.text((490, legend_y+3), "Original Signal", fill=(255,255,255), font=f_med)
 
     return comp
 
 # =============================================================================
-#  PHYSICS LAYER (unchanged)
+#  PHYSICS LAYER — ALL FUNCTIONS FULLY INCLUDED
 # =============================================================================
-# [All the same physics functions as before — fdm_soliton_2d, pdp_entanglement, etc.]
-# (They are identical to the previous full version I gave you)
-
 def fdm_soliton_2d(size: int = 300, m_fdm: float = 1.0) -> np.ndarray:
     y, x = np.ogrid[:size, :size]
     cx, cy = size // 2, size // 2
@@ -96,7 +91,99 @@ def fdm_soliton_2d(size: int = 300, m_fdm: float = 1.0) -> np.ndarray:
     mn, mx = sol.min(), sol.max()
     return (sol - mn) / (mx - mn + 1e-9)
 
-# ... (all other physics functions are the same as the last complete version)
+
+def generate_interference(size: int = 300, fringe: float = 65, omega: float = 0.7) -> np.ndarray:
+    y, x = np.ogrid[:size, :size]
+    cx, cy = size // 2, size // 2
+    r     = np.sqrt((x - cx)**2 + (y - cy)**2) / size * 4
+    theta = np.arctan2(y - cy, x - cx)
+    k     = fringe / 15.0
+    pat   = np.sin(k * 4 * np.pi * r) * 0.5 + np.sin(k * 2 * np.pi * (r + theta / (2 * np.pi))) * 0.5
+    pat   = pat * (1 + omega * 0.6 * np.sin(k * 4 * np.pi * r))
+    pat   = np.tanh(pat * 2)
+    return (pat - pat.min()) / (pat.max() - pat.min() + 1e-9)
+
+
+def dark_photon_signal(image: np.ndarray, epsilon: float = 1e-10, B_field: float = 1e15, m_dark: float = 1e-9) -> tuple:
+    mixing  = epsilon * B_field / (m_dark + 1e-12)
+    mscaled = min(mixing * 1e14, 1.0)
+    sig     = np.clip(image * mscaled * 5, 0, 1)
+    return sig, float(sig.max() * 100)
+
+
+def pdp_entanglement(image, interference, soliton, omega) -> np.ndarray:
+    m = omega * 0.6
+    return np.clip(image * (1 - m * 0.4) + interference * m * 0.5 + soliton * m * 0.4, 0, 1)
+
+
+def spectral_duality_filter(image: np.ndarray, omega: float = 0.5, fringe_scale: float = 1.0, mixing_angle: float = 0.1, dark_photon_mass: float = 1e-9) -> tuple:
+    rows, cols = image.shape
+    fft_s = fftshift(fft2(image))
+    x = np.linspace(-1, 1, cols)
+    y = np.linspace(-1, 1, rows)
+    X, Y = np.meshgrid(x, y)
+    R    = np.sqrt(X**2 + Y**2)
+    L    = 100.0 / max(dark_photon_mass * 1e9, 1e-6)
+    osc  = np.sin(2 * np.pi * R * L / max(fringe_scale, 0.1))
+    dmm  = (mixing_angle * np.exp(-omega * R**2) * np.abs(osc) * (1 - np.exp(-R**2 / max(fringe_scale, 0.1))))
+    omm  = np.exp(-R**2 / max(fringe_scale, 0.1)) - dmm
+    dark_mode     = np.abs(ifft2(fftshift(fft_s * dmm)))
+    ordinary_mode = np.abs(ifft2(fftshift(fft_s * omm)))
+    return ordinary_mode, dark_mode
+
+
+def entanglement_residuals(image, ordinary, dark, strength: float = 0.3, mixing_angle: float = 0.1, fringe_scale: float = 1.0) -> np.ndarray:
+    eps   = 1e-10
+    tp    = np.sum(image**2) + eps
+    rho   = np.maximum(ordinary**2 / tp, eps)
+    S     = -rho * np.log(rho)
+    xterm = (np.abs(ordinary + dark)**2 - ordinary**2 - dark**2) / tp
+    res   = S * strength + np.abs(xterm) * mixing_angle
+    ks = max(3, int(fringe_scale))
+    if ks % 2 == 0: ks += 1
+    kernel = np.outer(np.hanning(ks), np.hanning(ks))
+    return convolve(res, kernel / kernel.sum(), mode="constant")
+
+
+def stealth_probability(dark_mode, residuals, entanglement_strength: float = 0.3) -> np.ndarray:
+    dark_ev = dark_mode / (dark_mode.mean() + 0.1)
+    lm      = uniform_filter(residuals, size=5)
+    res_ev  = lm / (lm.mean() + 0.1)
+    prior   = entanglement_strength
+    lhood   = dark_ev * res_ev
+    prob    = prior * lhood / (prior * lhood + (1 - prior) + 1e-10)
+    return np.clip(gaussian_filter(prob, sigma=1.0), 0, 1)
+
+
+def blue_halo_fusion(image, dark_mode, residuals) -> np.ndarray:
+    def pnorm(a):
+        mn, mx = a.min(), a.max()
+        return np.sqrt((a - mn) / (mx - mn + 1e-10))
+    rn, dn, en = pnorm(image), pnorm(dark_mode), pnorm(residuals)
+    kernel = np.ones((5, 5)) / 25
+    lm     = convolve(en, kernel, mode="constant")
+    en_enh = np.clip(en * (1 + 2 * np.abs(en - lm)), 0, 1)
+    rgb    = np.stack([rn, en_enh, np.clip(gaussian_filter(dn, 2.0) + 0.3 * dn, 0, 1)], axis=-1)
+    return np.clip(rgb ** 0.45, 0, 1)
+
+
+def magnetar_fields(size: int = 300, B0: float = 1e15, mixing_angle: float = 0.1) -> tuple:
+    B_CRIT = 4.414e13
+    y, x   = np.ogrid[:size, :size]
+    cx, cy = size // 2, size // 2
+    dx = (x - cx) / (size / 4)
+    dy = (y - cy) / (size / 4)
+    r     = np.sqrt(dx**2 + dy**2) + 0.1
+    theta = np.arctan2(dy, dx)
+    B_mag = (B0 / r**3) * np.sqrt(3 * np.cos(theta)**2 + 1)
+    B_n   = np.clip(B_mag / B_mag.max(), 0, 1)
+    qed   = (B_mag / B_CRIT)**2
+    qed_n = np.clip(qed / (qed.max() + 1e-30), 0, 1)
+    m_eff = 1e-9
+    conv  = (mixing_angle**2) * (1 - np.exp(-B_mag**2 / (m_eff**2 + 1e-30) * 1e-26))
+    conv_n = np.clip(conv / (conv.max() + 1e-30), 0, 1)
+    return B_n, qed_n, conv_n
+
 
 def load_image(f):
     if f is None:
@@ -108,8 +195,9 @@ def load_image(f):
         data = np.array(img2, dtype=np.float32) / 255.0
     return data
 
+
 # =============================================================================
-#  BEAUTIFUL MOVING WAVE ANIMATION (vibrant colors + glow)
+#  VIBRANT MOVING WAVE ANIMATION
 # =============================================================================
 WAVE_HTML = """
 <canvas id="waveCanvas" width="920" height="340" style="background:#0a0a1f; border-radius:12px; box-shadow:0 0 20px rgba(155,124,246,0.4);"></canvas>
@@ -119,7 +207,6 @@ const ctx = c.getContext('2d');
 let t = 0;
 function draw() {
   ctx.clearRect(0,0,c.width,c.height);
-  // Light wave - vibrant purple with glow
   ctx.shadowBlur = 15; ctx.shadowColor = '#9b7cf6';
   ctx.strokeStyle = '#c4a3ff'; ctx.lineWidth = 4;
   ctx.beginPath();
@@ -128,7 +215,6 @@ function draw() {
   }
   ctx.stroke();
 
-  // Dark wave - cyan with glow
   ctx.shadowBlur = 15; ctx.shadowColor = '#4ecdc4';
   ctx.strokeStyle = '#5ff8e8'; ctx.lineWidth = 4;
   ctx.beginPath();
@@ -137,7 +223,6 @@ function draw() {
   }
   ctx.stroke();
 
-  // Interference - hot pink with glow
   ctx.shadowBlur = 25; ctx.shadowColor = '#f06292';
   ctx.strokeStyle = '#ff8ac4'; ctx.lineWidth = 5;
   ctx.beginPath();
@@ -207,7 +292,6 @@ if uploaded is not None:
     st.markdown("### Before vs After — Clean & Beautiful")
     st.image("output/composite_before_after_infographic.png", use_container_width=True)
 
-    # Additional maps + Blue Halo / Magnetar (same as before)
     st.markdown("### Additional Annotated Maps")
     col1, col2, col3 = st.columns(3)
     with col1: st.image(qcaus_full_infographic(soliton, "FDM SOLITON MAP", metrics, legend_items=[((0,255,0),"FDM Density")]), caption="FDM SOLITON MAP", use_container_width=True)
@@ -219,7 +303,6 @@ if uploaded is not None:
     with colA: st.image(qcaus_full_infographic(blue_halo, "BLUE HALO FUSION", metrics), caption="BLUE HALO FUSION", use_container_width=True)
     with colB: st.image(qcaus_full_infographic(B_n, "MAGNETAR B-FIELD", metrics, legend_items=[((255,60,60),"B-Field")]), caption="MAGNETAR B-FIELD", use_container_width=True)
 
-    # Download
     st.markdown("### 📥 Download All Infographic Images")
     if st.button("📦 Download Everything as ZIP"):
         zip_buffer = io.BytesIO()

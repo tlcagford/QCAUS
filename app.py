@@ -1,13 +1,12 @@
 """
-QCAUS v16.0 – FINAL WORKING VERSION
-Fixed PIL alpha channel issue | All images display
+QCAUS v17.0 – SIMPLIFIED WORKING VERSION
+All images guaranteed to display
 """
 
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
-from scipy.ndimage import gaussian_filter
 from astropy.io import fits
 import io
 import warnings
@@ -17,7 +16,7 @@ warnings.filterwarnings('ignore')
 # ── PAGE CONFIG ─────────────────────────────────────────────
 st.set_page_config(
     layout="wide",
-    page_title="QCAUS v16.0",
+    page_title="QCAUS v17.0",
     page_icon="🔭",
     initial_sidebar_state="expanded"
 )
@@ -124,7 +123,6 @@ def array_to_pil(arr):
 
 
 def add_annotations_pil(img_pil, metadata, scale_kpc=100, title="After"):
-    """Add annotations to PIL image (no alpha channel)"""
     draw = ImageDraw.Draw(img_pil)
     w, h = img_pil.size
     
@@ -143,26 +141,41 @@ def add_annotations_pil(img_pil, metadata, scale_kpc=100, title="After"):
     draw.line([w-30, 30, w-30, 60], fill='black', width=2)
     draw.text((w-38, 15), "N", fill='black', font=font)
     
-    # Info box (no alpha, just white fill)
+    # Info box
     info_lines = [
         f"Ω = {metadata.get('omega',0):.2f} | Fringe = {metadata.get('fringe',0)}",
         f"γ→A' Signal: {metadata.get('signal',0):.1f}%"
     ]
-    # White background with black border
     draw.rectangle([12, 12, 250, 12 + len(info_lines) * 22 + 8], fill='white', outline='black')
     for i, line in enumerate(info_lines):
         draw.text((18, 18 + i * 22), line, fill='black', font=font)
     
-    # Title
     draw.text((w//2 - 80, 10), title, fill='black', font=font)
     
     return img_pil
 
 
+def create_plot_as_pil():
+    """Create matplotlib plot and convert to PIL for reliable display"""
+    fig, ax = plt.subplots(figsize=(5, 4))
+    r = np.linspace(0, 5, 500)
+    profile = fdm_soliton_profile(r, 1e-22)
+    ax.plot(r, profile, 'r-', linewidth=2)
+    ax.set_xlabel("r (kpc)")
+    ax.set_ylabel("ρ(r) / ρ₀")
+    ax.set_title("FDM Soliton Profile")
+    ax.grid(True, alpha=0.3)
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png', bbox_inches='tight')
+    buf.seek(0)
+    plt.close(fig)
+    return Image.open(buf)
+
+
 # ── SIDEBAR ─────────────────────────────────────────────
 with st.sidebar:
-    st.title("🔭 QCAUS v16.0")
-    st.markdown("*Final Working Version*")
+    st.title("🔭 QCAUS v17.0")
+    st.markdown("*Simplified Display*")
     st.markdown("---")
     
     uploaded = st.file_uploader("📁 Upload Image", type=['fits', 'png', 'jpg', 'jpeg'])
@@ -192,7 +205,7 @@ with st.sidebar:
         st.metric("Fringe λ", f"{lambda_fringe:.2f} kpc")
         st.metric("Core ρ_c", f"{rho_c:.2e} M☉/kpc³")
     
-    st.caption("Tony Ford | QCAUS v16.0")
+    st.caption("Tony Ford | QCAUS v17.0")
 
 
 # ── MAIN APP ─────────────────────────────────────────────
@@ -248,9 +261,12 @@ pdp_pil = array_to_pil(pdp_result)
 conversion_pil = array_to_pil(conversion_signal)
 rgb_pil = array_to_pil(rgb_composite)
 
-# Annotate before/after (no alpha)
+# Annotate before/after
 before_pil = add_annotations_pil(original_pil.copy(), {'omega': omega, 'fringe': fringe, 'signal': 0}, scale_kpc, "Before")
 after_pil = add_annotations_pil(rgb_pil.copy(), {'omega': omega, 'fringe': fringe, 'signal': conversion_conf}, scale_kpc, "After")
+
+# Create plot as PIL
+soliton_plot_pil = create_plot_as_pil()
 
 # ── BEFORE / AFTER ─────────────────────────────────────────────
 st.markdown("### 📊 Before vs After")
@@ -258,10 +274,10 @@ st.markdown("### 📊 Before vs After")
 col_before, col_after = st.columns(2)
 with col_before:
     st.image(before_pil, use_container_width=True)
-    st.caption("Before: Standard View (Public HST/JWST Data)")
+    st.caption("Before: Standard View")
 with col_after:
     st.image(after_pil, use_container_width=True)
-    st.caption("After: Photon-Dark-Photon Entangled + Dark Photon Signal")
+    st.caption("After: PDP Entangled + Dark Photon Signal")
 
 st.markdown("---")
 
@@ -272,33 +288,20 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.image(interference_pil, use_container_width=True)
-    st.caption("PDP Interference Pattern | ρ = |ψ₁|² + |ψ₂|² + 2Re(ψ₁*ψ₂ e^{iΔφ}) | λ = h/(mΔv)")
+    st.caption("PDP Interference Pattern")
 
 with col2:
-    # Soliton profile plot
-    r = np.linspace(0, 5, 500)
-    profile = fdm_soliton_profile(r, m_fdm * 1e-22)
-    fig, ax = plt.subplots(figsize=(5, 4))
-    ax.plot(r, profile, 'r-', linewidth=2)
-    ax.set_xlabel("r (kpc)")
-    ax.set_ylabel("ρ(r) / ρ₀")
-    ax.set_title(f"FDM Soliton Core | m = {m_fdm}×10⁻²² eV")
-    ax.grid(True, alpha=0.3)
-    buf = io.BytesIO()
-    fig.savefig(buf, format='png', bbox_inches='tight')
-    buf.seek(0)
-    st.image(Image.open(buf), use_container_width=True)
-    plt.close(fig)
-    st.caption("ρ(r) = ρ₀ [sin(kr)/(kr)]² | Ground state of Schrödinger-Poisson")
+    st.image(soliton_plot_pil, use_container_width=True)
+    st.caption("FDM Soliton Profile | ρ(r) = ρ₀ [sin(kr)/(kr)]²")
 
 col3, col4 = st.columns(2)
 
 with col3:
     st.image(soliton_pil, use_container_width=True)
-    st.caption(f"FDM Soliton Core (2D) | Core density: {rho_c:.2e} M☉/kpc³")
+    st.caption(f"FDM Soliton Core (2D) | ρ_c = {rho_c:.2e} M☉/kpc³")
 
 with col4:
-    # Parameter sweep
+    # Parameter sweep plot
     fig, ax = plt.subplots(figsize=(5, 4))
     masses = [0.5, 1.0, 2.0, 3.0, 4.0]
     colors = ['blue', 'cyan', 'green', 'orange', 'red']
@@ -321,18 +324,19 @@ with col4:
 st.markdown("---")
 
 # ── ALL PHYSICS OUTPUTS ─────────────────────────────────────────────
-with st.expander("📊 View All Physics Outputs", expanded=False):
-    col_a, col_b, col_c = st.columns(3)
-    
-    with col_a:
-        st.image(original_pil, caption="Original", use_container_width=True)
-        st.image(soliton_pil, caption="FDM Soliton", use_container_width=True)
-    with col_b:
-        st.image(dark_photon_pil, caption="Dark Photon Field", use_container_width=True)
-        st.image(interference_pil, caption="PDP Interference", use_container_width=True)
-    with col_c:
-        st.image(pdp_pil, caption="PDP Entangled", use_container_width=True)
-        st.image(conversion_pil, caption="γ→A' Signal", use_container_width=True)
+st.markdown("### 📊 All Physics Outputs")
+
+col_a, col_b, col_c = st.columns(3)
+
+with col_a:
+    st.image(original_pil, caption="Original", use_container_width=True)
+    st.image(soliton_pil, caption="FDM Soliton", use_container_width=True)
+with col_b:
+    st.image(dark_photon_pil, caption="Dark Photon Field", use_container_width=True)
+    st.image(interference_pil, caption="PDP Interference", use_container_width=True)
+with col_c:
+    st.image(pdp_pil, caption="PDP Entangled", use_container_width=True)
+    st.image(conversion_pil, caption="γ→A' Signal", use_container_width=True)
 
 # ── METRICS ─────────────────────────────────────────────
 st.markdown("---")
@@ -382,13 +386,5 @@ with col_d3:
 with col_d4:
     st.download_button("⭐ FDM Soliton", pil_to_bytes(soliton_pil), "soliton.png")
 
-# ── EQUATIONS ─────────────────────────────────────────────
-with st.expander("📚 FDM Derivation Equations", expanded=False):
-    st.latex(r"\rho(r) = \rho_0 \left[\frac{\sin(kr)}{kr}\right]^2")
-    st.latex(r"\lambda = \frac{h}{m \Delta v}")
-    st.latex(r"i\partial_t\psi = -\frac{1}{2m}\nabla^2\psi + \Phi\psi")
-    st.latex(r"\nabla^2\Phi = 4\pi G|\psi|^2")
-    st.latex(r"P(\gamma \to A') = \left(\frac{\varepsilon B}{m'}\right)^2 \sin^2\left(\frac{m'^2 L}{4\omega}\right)")
-
 st.markdown("---")
-st.markdown("⚡ **QCAUS v16.0** | Final Working Version | All images display | Tony Ford Model")
+st.markdown("⚡ **QCAUS v17.0** | Simplified Display | Tony Ford Model")

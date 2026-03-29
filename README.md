@@ -1,3 +1,4 @@
+IN DEVELOPMENT This Will Replace most of my public projecs as they wil be incorporated and the old REPOs will be archieved and no longer supported
 
 # 🌌 Quantum Cosmology & Astrophysics Unified Suite (QCAUS)
 

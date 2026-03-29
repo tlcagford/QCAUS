@@ -9,7 +9,7 @@ A comprehensive open-source framework integrating quantum field theory, dark mat
 
 ## 📸 Live Demo
 
-**[Launch QCAUS App](https://quantum-cosmology-astrophysics-unified-suite.streamlit.app/)**
+**[Launch QCAUS App](https://qcaustfordmodel.streamlit.app/)**
 
 ---
 

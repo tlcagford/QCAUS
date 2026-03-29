@@ -6,7 +6,7 @@ Ground state solution of Schrödinger-Poisson equation
 
 import numpy as np
 from scipy.ndimage import gaussian_filter
-from .constants import m_fdm_typical, G_newton, M_sun, kpc_to_km
+from .constants import m_fdm_typical
 
 def fdm_soliton_profile(r, fringe, rho0=1.0, m_fdm=None):
     """
@@ -80,9 +80,10 @@ def fdm_soliton_quantum_correction(r, m_fdm, rho0=1.0):
     FDM soliton with quantum corrections from self-interactions
     δ_quantum ∝ (m_fdm / m_Planck)²
     """
+    from .constants import m_planck
+    
     soliton = fdm_soliton_profile(r, m_fdm=m_fdm)
     
-    m_planck = 1.22e28  # eV
     quantum_correction = 1 + (m_fdm / m_planck)**2 * 100
     
     return soliton * rho0 * quantum_correction

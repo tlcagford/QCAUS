@@ -1,0 +1,33 @@
+QCAUS/
+├── README.md                    # Your excellent unified README
+├── LICENSE                      # Dual license
+├── requirements.txt             # All dependencies
+├── app.py                       # Unified Streamlit dashboard (from our work)
+├── core/
+│   ├── __init__.py
+│   ├── pdp_physics.py           # Shared PDP core functions
+│   ├── fdm_soliton.py           # FDM soliton calculations
+│   ├── magnetar_qed.py          # Magnetar physics
+│   ├── primordial_entanglement.py # von Neumann evolution
+│   └── qcis_power_spectrum.py   # Quantum-corrected spectra
+├── dashboards/
+│   ├── __init__.py
+│   ├── qci_dashboard.py         # QCI AstroEntangle module
+│   ├── magnetar_dashboard.py    # Magnetar QED module
+│   ├── primordial_dashboard.py  # Primordial Entanglement module
+│   ├── qcis_dashboard.py        # QCIS module
+│   └── stealth_dashboard.py     # NEW: StealthPDPRadar module
+├── utils/
+│   ├── __init__.py
+│   ├── file_handlers.py         # FITS, image loading
+│   ├── visualization.py         # Plotting helpers
+│   └── annotations.py           # QCI-style annotations
+├── data/
+│   ├── historical_airports.json # Airport database
+│   └── stealth_signatures.json  # Platform signatures
+├── tests/
+│   ├── test_physics.py
+│   └── test_visualization.py
+└── examples/
+    ├── bullet_cluster.fits
+    └── crab_nebula.jpg

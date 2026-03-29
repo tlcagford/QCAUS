@@ -1,6 +1,6 @@
 """
-QCAUS v15.0 – DIRECT DISPLAY VERSION
-Uses PIL images directly for guaranteed display
+QCAUS v16.0 – FINAL WORKING VERSION
+Fixed PIL alpha channel issue | All images display
 """
 
 import streamlit as st
@@ -17,7 +17,7 @@ warnings.filterwarnings('ignore')
 # ── PAGE CONFIG ─────────────────────────────────────────────
 st.set_page_config(
     layout="wide",
-    page_title="QCAUS v15.0",
+    page_title="QCAUS v16.0",
     page_icon="🔭",
     initial_sidebar_state="expanded"
 )
@@ -120,12 +120,11 @@ def load_image(uploaded_file):
 
 
 def array_to_pil(arr):
-    """Convert numpy array to PIL Image"""
     return Image.fromarray((np.clip(arr, 0, 1) * 255).astype(np.uint8))
 
 
 def add_annotations_pil(img_pil, metadata, scale_kpc=100, title="After"):
-    """Add annotations to PIL image"""
+    """Add annotations to PIL image (no alpha channel)"""
     draw = ImageDraw.Draw(img_pil)
     w, h = img_pil.size
     
@@ -138,30 +137,32 @@ def add_annotations_pil(img_pil, metadata, scale_kpc=100, title="After"):
     bar_width = 100
     bar_kpc = (bar_width / w) * scale_kpc
     draw.rectangle([20, h-40, 20+bar_width, h-34], fill='black')
-    draw.text((20+35, h-55), f"{bar_kpc:.0f} kpc", fill='black', font=font)
+    draw.text((20+35, h-55), f"{bar_kpc:.0f} kpc", fill='white', font=font)
     
     # North indicator
     draw.line([w-30, 30, w-30, 60], fill='black', width=2)
     draw.text((w-38, 15), "N", fill='black', font=font)
     
-    # Info box
+    # Info box (no alpha, just white fill)
     info_lines = [
         f"Ω = {metadata.get('omega',0):.2f} | Fringe = {metadata.get('fringe',0)}",
         f"γ→A' Signal: {metadata.get('signal',0):.1f}%"
     ]
-    draw.rectangle([12, 12, 250, 12 + len(info_lines) * 22 + 8], fill=(255,255,255,200), outline='black')
+    # White background with black border
+    draw.rectangle([12, 12, 250, 12 + len(info_lines) * 22 + 8], fill='white', outline='black')
     for i, line in enumerate(info_lines):
-        draw.text((18, 18 + i * 22), line, fill='#1e3a5f', font=font)
+        draw.text((18, 18 + i * 22), line, fill='black', font=font)
     
-    draw.text((w//2 - 80, 10), title, fill='#1e3a5f', font=font)
+    # Title
+    draw.text((w//2 - 80, 10), title, fill='black', font=font)
     
     return img_pil
 
 
 # ── SIDEBAR ─────────────────────────────────────────────
 with st.sidebar:
-    st.title("🔭 QCAUS v15.0")
-    st.markdown("*Direct Display Version*")
+    st.title("🔭 QCAUS v16.0")
+    st.markdown("*Final Working Version*")
     st.markdown("---")
     
     uploaded = st.file_uploader("📁 Upload Image", type=['fits', 'png', 'jpg', 'jpeg'])
@@ -191,7 +192,7 @@ with st.sidebar:
         st.metric("Fringe λ", f"{lambda_fringe:.2f} kpc")
         st.metric("Core ρ_c", f"{rho_c:.2e} M☉/kpc³")
     
-    st.caption("Tony Ford | QCAUS v15.0")
+    st.caption("Tony Ford | QCAUS v16.0")
 
 
 # ── MAIN APP ─────────────────────────────────────────────
@@ -238,7 +239,7 @@ rgb_composite = np.stack([
 ], axis=-1)
 rgb_composite = np.clip(rgb_composite, 0, 1)
 
-# Convert all to PIL for display
+# Convert to PIL
 original_pil = array_to_pil(img_data)
 soliton_pil = array_to_pil(soliton)
 dark_photon_pil = array_to_pil(dark_photon)
@@ -247,7 +248,7 @@ pdp_pil = array_to_pil(pdp_result)
 conversion_pil = array_to_pil(conversion_signal)
 rgb_pil = array_to_pil(rgb_composite)
 
-# Annotate before/after
+# Annotate before/after (no alpha)
 before_pil = add_annotations_pil(original_pil.copy(), {'omega': omega, 'fringe': fringe, 'signal': 0}, scale_kpc, "Before")
 after_pil = add_annotations_pil(rgb_pil.copy(), {'omega': omega, 'fringe': fringe, 'signal': conversion_conf}, scale_kpc, "After")
 
@@ -274,7 +275,7 @@ with col1:
     st.caption("PDP Interference Pattern | ρ = |ψ₁|² + |ψ₂|² + 2Re(ψ₁*ψ₂ e^{iΔφ}) | λ = h/(mΔv)")
 
 with col2:
-    # Create soliton profile plot as PIL
+    # Soliton profile plot
     r = np.linspace(0, 5, 500)
     profile = fdm_soliton_profile(r, m_fdm * 1e-22)
     fig, ax = plt.subplots(figsize=(5, 4))
@@ -297,7 +298,7 @@ with col3:
     st.caption(f"FDM Soliton Core (2D) | Core density: {rho_c:.2e} M☉/kpc³")
 
 with col4:
-    # Parameter sweep plot
+    # Parameter sweep
     fig, ax = plt.subplots(figsize=(5, 4))
     masses = [0.5, 1.0, 2.0, 3.0, 4.0]
     colors = ['blue', 'cyan', 'green', 'orange', 'red']
@@ -366,7 +367,7 @@ def pil_to_bytes(pil_img):
 
 col_d1, col_d2, col_d3, col_d4 = st.columns(4)
 
-# Create side-by-side image
+# Side-by-side
 w, h = before_pil.size
 combined = Image.new('RGB', (w * 2, h))
 combined.paste(before_pil, (0, 0))
@@ -390,4 +391,4 @@ with st.expander("📚 FDM Derivation Equations", expanded=False):
     st.latex(r"P(\gamma \to A') = \left(\frac{\varepsilon B}{m'}\right)^2 \sin^2\left(\frac{m'^2 L}{4\omega}\right)")
 
 st.markdown("---")
-st.markdown("⚡ **QCAUS v15.0** | Direct Display | All images use PIL | Tony Ford Model")
+st.markdown("⚡ **QCAUS v16.0** | Final Working Version | All images display | Tony Ford Model")

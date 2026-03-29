@@ -52,7 +52,7 @@ tab_home, tab_cosmo, tab_astro, tab_defense, tab_radar, tab_theory = st.tabs([
 with tab_home:
     st.header("Welcome to QCAUS")
     st.markdown("Photon-Dark-Photon Two-Field Fuzzy Dark Matter Framework")
-    st.success("BioGen removed • Multi-format file processing active (CSV, PNG, DICOM, FITS)")
+    st.• Multi-format file processing active (CSV, PNG, DICOM, FITS)")
 
 with tab_cosmo:
     st.header("Cosmology Simulator")

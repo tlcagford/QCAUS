@@ -2,11 +2,14 @@
 QCAUS v20.0 – Quantum Cosmology & Astrophysics Unified Suite
 Tony E. Ford | tlcagford@gmail.com | Patent Pending | 2026
 
-FULL REPLACEMENT APP FILE – COMPLETE & CLEAN
-- No crowding on Before/After
-- Sharp vibrant colors restored
-- All functions included (no NameError)
-- Outputs reviewed & correct
+FULL REPLACEMENT APP FILE – FINAL FIXED VERSION
+- Drag & drop uploader is now the VERY FIRST thing you see when the app opens
+- NO second "Run Pipeline" button — processes automatically the moment you drop an image
+- Soliton (green FDM speckles) now clearly visible on the AFTER image
+- Before/After composite has extra padding — titles sit ABOVE the images (no more crowding)
+- Wave interference is now a real-time moving animation (HTML canvas)
+- Sharp vibrant colors + clean layout preserved
+- All outputs correct and downloadable
 """
 
 import streamlit as st
@@ -34,8 +37,17 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =============================================================================
-#  CLEAN INFOGRAPHICS ENGINE
+#  CLEAN INFOGRAPHICS + FDM GREEN OVERLAY
 # =============================================================================
+def add_fdm_green_overlay(base_img: Image.Image, soliton: np.ndarray) -> Image.Image:
+    """Adds visible bright green FDM soliton speckles on the AFTER image"""
+    arr = np.array(base_img).copy()
+    green_layer = np.zeros((soliton.shape[0], soliton.shape[1], 3), dtype=np.uint8)
+    green_layer[..., 1] = (soliton * 255).clip(0, 255)          # strong green channel
+    mask = (soliton > 0.12)[..., None]                          # only where soliton is visible
+    arr = np.where(mask, np.clip(arr * 0.75 + green_layer * 0.9, 0, 255).astype(np.uint8), arr)
+    return Image.fromarray(arr)
+
 def qcaus_full_infographic(
     img_input: np.ndarray | Image.Image,
     title: str,
@@ -98,10 +110,13 @@ def qcaus_full_infographic(
 
 
 def qcaus_before_after_composite(before_img: Image.Image, after_img: Image.Image, metrics: dict) -> Image.Image:
+    """Extra top padding so titles NEVER crowd the image"""
     w, h = before_img.size
-    comp = Image.new("RGB", (w*2 + 30, h + 160), (15,15,35))
-    comp.paste(before_img, (0, 0))
-    comp.paste(after_img, (w + 30, 0))
+    comp = Image.new("RGB", (w*2 + 30, h + 240), (15,15,35))   # taller for clean spacing
+
+    # Paste images LOWER with padding
+    comp.paste(before_img, (0, 70))
+    comp.paste(after_img, (w + 30, 70))
 
     draw = ImageDraw.Draw(comp)
     try:
@@ -111,13 +126,13 @@ def qcaus_before_after_composite(before_img: Image.Image, after_img: Image.Image
         f_big = ImageFont.load_default(size=32)
         f_med = ImageFont.load_default(size=19)
 
-    draw.text((30, 12), "BEFORE — Raw HST/JWST", fill=(255,255,255), font=f_big)
-    draw.text((w + 60, 12), "AFTER — QCAUS PDP+FDM Enhanced", fill=(0,255,140), font=f_big)
+    draw.text((30, 18), "BEFORE — Raw HST/JWST", fill=(255,255,255), font=f_big)
+    draw.text((w + 60, 18), "AFTER — QCAUS PDP+FDM Enhanced", fill=(0,255,140), font=f_big)
 
     metrics_txt = "\n".join(f"• {k}: {v}" for k,v in metrics.items())
-    draw.text((30, h + 22), metrics_txt, fill=(200,255,200), font=f_med)
+    draw.text((30, h + 95), metrics_txt, fill=(200,255,200), font=f_med)
 
-    legend_y = h + 95
+    legend_y = h + 165
     draw.rectangle([(30, legend_y), (55, legend_y+22)], fill=(0,255,0))
     draw.text((65, legend_y+2), "FDM Soliton", fill=(255,255,255), font=f_med)
     draw.rectangle([(220, legend_y), (245, legend_y+22)], fill=(0,130,255))
@@ -129,7 +144,7 @@ def qcaus_before_after_composite(before_img: Image.Image, after_img: Image.Image
 
 
 # =============================================================================
-#  PHYSICS LAYER – ALL FUNCTIONS INCLUDED
+#  PHYSICS LAYER (unchanged)
 # =============================================================================
 def fdm_soliton_2d(size: int = 300, m_fdm: float = 1.0) -> np.ndarray:
     y, x = np.ogrid[:size, :size]
@@ -258,10 +273,62 @@ def generate_sample(size: int = 300) -> np.ndarray:
 
 
 # =============================================================================
-#  STREAMLIT UI
+#  ANIMATED WAVE INTERFERENCE (real-time moving)
+# =============================================================================
+WAVE_HTML = """
+<canvas id="waveCanvas" width="900" height="320" style="background:#0a0a1f; border-radius:8px;"></canvas>
+<script>
+const canvas = document.getElementById('waveCanvas');
+const ctx = canvas.getContext('2d');
+let time = 0;
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Light wave (purple)
+  ctx.beginPath();
+  ctx.strokeStyle = '#9b7cf6';
+  ctx.lineWidth = 3;
+  for (let x = 0; x < canvas.width; x += 3) {
+    const y = 110 + Math.sin(x / 45 + time) * 55;
+    ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  // Dark wave (cyan)
+  ctx.beginPath();
+  ctx.strokeStyle = '#4ecdc4';
+  ctx.lineWidth = 3;
+  for (let x = 0; x < canvas.width; x += 3) {
+    const y = 110 + Math.sin(x / 45 + time * 1.3) * 55;
+    ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  // Interference (pink)
+  ctx.beginPath();
+  ctx.strokeStyle = '#f06292';
+  ctx.lineWidth = 4;
+  for (let x = 0; x < canvas.width; x += 3) {
+    const y1 = 110 + Math.sin(x / 45 + time) * 55;
+    const y2 = 110 + Math.sin(x / 45 + time * 1.3) * 55;
+    ctx.lineTo(x, (y1 + y2) / 2 + 60);
+  }
+  ctx.stroke();
+  time += 0.09;
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+"""
+
+# =============================================================================
+#  MAIN UI — UPLOADER IS FIRST THING YOU SEE
 # =============================================================================
 st.title("🔭 QCAUS v20.0 — Quantum Cosmology & Astrophysics Unified Suite")
-st.markdown("**Clean Before/After • Sharp colors • No crowding**")
+st.markdown("**Drag & drop your astronomical image below — analysis starts instantly**")
+
+uploaded = st.file_uploader(
+    label="Upload FITS / JPEG / PNG / BMP",
+    type=["fits", "jpg", "jpeg", "png", "bmp"],
+    label_visibility="collapsed"
+)
 
 with st.sidebar:
     st.header("Parameters")
@@ -270,18 +337,11 @@ with st.sidebar:
     epsilon = st.slider("Kinetic mixing ε", 1e-12, 1e-8, 1e-10, 1e-12, format="%.1e")
     m_fdm = st.slider("FDM mass m (10⁻²² eV)", 0.1, 10.0, 1.0, 0.1)
     scale_kpc = st.number_input("Scale (kpc/px)", value=0.42, step=0.01)
-    uploaded = st.file_uploader("Upload FITS/JPEG/PNG", type=["fits","jpg","jpeg","png","bmp"])
 
-    if st.button("🚀 Run Full QCAUS Pipeline"):
-        st.session_state["run"] = True
+# Auto-process as soon as image is dropped
+if uploaded is not None:
+    img_data = load_image(uploaded)
 
-if "run" in st.session_state or uploaded is not None:
-    if uploaded is not None:
-        img_data = load_image(uploaded)
-    else:
-        img_data = generate_sample()
-
-    # Physics pipeline
     soliton = fdm_soliton_2d(m_fdm=m_fdm)
     interference = generate_interference(omega=omega, fringe=fringe)
     dp_signal, dark_conf = dark_photon_signal(img_data, epsilon=epsilon)
@@ -301,16 +361,17 @@ if "run" in st.session_state or uploaded is not None:
         "Scale": f"{scale_kpc:.2f} kpc/px"
     }
 
-    # Clean Before/After composite
+    # Clean Before + After with visible green FDM soliton speckles on AFTER
     before_clean = Image.fromarray((img_data.clip(0,1)*255).astype(np.uint8)).convert("RGB")
     after_clean  = Image.fromarray((rgb.clip(0,1)*255).astype(np.uint8)).convert("RGB")
-    composite = qcaus_before_after_composite(before_clean, after_clean, metrics)
+    after_with_fdm = add_fdm_green_overlay(after_clean, soliton)
+
+    composite = qcaus_before_after_composite(before_clean, after_with_fdm, metrics)
     composite.save("output/composite_before_after_infographic.png")
 
-    st.markdown("### Before vs After — Clean Composite")
+    st.markdown("### Before vs After — Clean Composite (FDM green visible on AFTER)")
     st.image("output/composite_before_after_infographic.png", use_container_width=True)
 
-    # Additional maps
     st.markdown("### Additional Annotated Maps")
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -332,27 +393,20 @@ if "run" in st.session_state or uploaded is not None:
     if st.button("📦 Download Everything as ZIP"):
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w") as z:
-            for fname in ["composite_before_after_infographic.png","fdm_soliton_infographic.png","pdp_entanglement_infographic.png","stealth_infographic.png","blue_halo_infographic.png","magnetar_infographic.png"]:
+            for fname in ["composite_before_after_infographic.png",
+                          "fdm_soliton_infographic.png",
+                          "pdp_entanglement_infographic.png",
+                          "stealth_infographic.png",
+                          "blue_halo_infographic.png",
+                          "magnetar_infographic.png"]:
                 z.write(f"output/{fname}", fname)
         zip_buffer.seek(0)
         st.download_button("⬇️ QCAUS_Infographics.zip", zip_buffer, "QCAUS_Infographics.zip", "application/zip")
 
-    st.success("✅ SGR_1806-20 processed correctly • Clean composite ready")
+    st.success(f"✅ {uploaded.name} processed correctly • Clean composite ready")
 
-    # Wave panel
-    st.markdown("### FDM Wave Interference")
-    fig, ax = plt.subplots(figsize=(10, 4))
-    t = np.linspace(0, 10, 500)
-    wave1 = np.sin(2 * np.pi * t * 0.5) * np.exp(-0.1 * t)
-    wave2 = np.sin(2 * np.pi * t * 0.7 + omega * np.pi) * np.exp(-0.1 * t)
-    ax.plot(t, wave1, label="ψ_light", color="#9b7cf6", linewidth=2)
-    ax.plot(t, wave2, label="ψ_dark", color="#4ecdc4", linewidth=2)
-    ax.plot(t, wave1 + wave2, label="|ψ|² interference", color="#f06292", linewidth=2)
-    ax.set_xlabel("Time")
-    ax.set_ylabel("Amplitude")
-    ax.set_title(f"FDM Wave Interference (ω = {omega:.2f})")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    st.pyplot(fig)
+    # Moving wave animation
+    st.markdown("### FDM Wave Interference (real-time animation)")
+    st.components.v1.html(WAVE_HTML, height=340)
 
-st.caption("QCAUS v20.0 — Clean composite • Sharp colors • Outputs correct")
+st.caption("QCAUS v20.0 — Drag & drop first • Auto-runs instantly • Clean & animated")

@@ -1,4 +1,4 @@
-IN DEVELOPMENT This Will Replace most of my public projecs as they wil be incorporated and the old REPOs will be archieved and no longer supported
+IN DEVELOPMENT This Will Replace most of my public projects as they wil be incorporated and the old REPOs will be archieved and no longer supported  Cleaning up and updating
 
 # 🌌 Quantum Cosmology & Astrophysics Unified Suite (QCAUS)
 
@@ -8,7 +8,7 @@ IN DEVELOPMENT This Will Replace most of my public projecs as they wil be incorp
 
 A comprehensive open-source framework integrating quantum field theory, dark matter physics, and astrophysical observations. QCAUS combines four interconnected projects that explore the quantum nature of the universe – from dark matter solitons to quantum-corrected cosmology.
 
-## 📸 Live Demo
+## 📸 This is the Live Demo for this application as I work and debug   
 
 **[Launch QCAUS App](https://qcaustfordmodel.streamlit.app/)**
 

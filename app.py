@@ -1,14 +1,19 @@
 """
-QCAUS v4.0 – Unified Quantum Cosmology Suite
-One image upload → All physics outputs | Interactive layer toggles
+QCAUS v6.0 – Unified Quantum Cosmology Suite
+Integrated: HST/JWST PSF Pipeline | Stealth Detection | IR Spectrum Mapping
+All detection methods in main workflow
 """
 
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
-from scipy.ndimage import gaussian_filter, convolve
+from matplotlib.colors import LinearSegmentedColormap
+from scipy.ndimage import gaussian_filter, zoom
+from scipy.signal import wiener
 from astropy.io import fits
+from astropy.convolution import Gaussian2DKernel, convolve_fft
+from astropy.stats import sigma_clip
+from scipy.special import j1
 from PIL import Image, ImageDraw, ImageFont
 import io
 import json
@@ -18,41 +23,188 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-# ── PAGE CONFIG ─────────────────────────────────────────────
+# ── PAGE CONFIG – LIGHT THEME ─────────────────────────────────────────────
 st.set_page_config(
     layout="wide",
-    page_title="QCAUS v4.0 - Unified Suite",
+    page_title="QCAUS v6.0 - Unified Suite",
     page_icon="🔭",
     initial_sidebar_state="expanded"
 )
 
+# Professional light theme
 st.markdown("""
 <style>
-    [data-testid="stAppViewContainer"] { background: #0a0a1a; }
-    [data-testid="stSidebar"] { background: #0f0f1f; border-right: 2px solid #00aaff; }
-    .stTitle, h1, h2, h3 { color: #00aaff; }
-    [data-testid="stMetricValue"] { color: #00aaff; }
-    .stDownloadButton button { background-color: #00aaff; color: white; border-radius: 8px; }
-    .stButton button { background-color: #00aaff; color: white; }
-    .layer-toggle {
-        background-color: #1a1a3a;
-        padding: 5px 10px;
-        border-radius: 8px;
-        margin: 2px;
-        cursor: pointer;
-    }
+    [data-testid="stAppViewContainer"] { background: #f5f7fb; }
+    [data-testid="stSidebar"] { background: #ffffff; border-right: 1px solid #e0e4e8; }
+    .stTitle, h1, h2, h3 { color: #1e3a5f; }
+    [data-testid="stMetricValue"] { color: #1e3a5f; }
+    .stDownloadButton button { background-color: #1e3a5f; color: white; border-radius: 8px; }
+    .stButton button { background-color: #1e3a5f; color: white; }
 </style>
 """, unsafe_allow_html=True)
 
 
 # ── PHYSICS CONSTANTS ─────────────────────────────────────────────
-B_crit = 4.4e13
+B_crit = 4.4e13  # G
 alpha_fine = 1/137.036
 
 
-# ── CORE PHYSICS FUNCTIONS ─────────────────────────────────────────────
+# ── HST/JWST PSF MODELS ─────────────────────────────────────────────
 
-def fdm_soliton_core(size, fringe):
+def hst_psf_model(size, fwhm_pixels=2.0):
+    """HST PSF model (Gaussian + Airy disk)"""
+    y, x = np.ogrid[:size, :size]
+    cx, cy = size//2, size//2
+    r = np.sqrt((x - cx)**2 + (y - cy)**2)
+    
+    sigma = fwhm_pixels / (2 * np.sqrt(2 * np.log(2)))
+    gaussian = np.exp(-r**2 / (2 * sigma**2))
+    k = 2 * np.pi / fwhm_pixels
+    kr = k * r + 1e-9
+    airy = (2 * j1(kr) / kr)**2
+    
+    psf = gaussian * 0.7 + airy * 0.3
+    return psf / psf.sum()
+
+
+def jwst_psf_model(size, fwhm_pixels=1.5):
+    """JWST PSF model (Moffat + hexagonal spikes)"""
+    y, x = np.ogrid[:size, :size]
+    cx, cy = size//2, size//2
+    r = np.sqrt((x - cx)**2 + (y - cy)**2)
+    
+    beta = 3.5
+    alpha = fwhm_pixels / (2 * np.sqrt(2**(1/beta) - 1))
+    moffat = (1 + (r / alpha)**2)**(-beta)
+    
+    theta = np.arctan2(y - cy, x - cx)
+    spikes = 1 + 0.2 * np.cos(6 * theta) * np.exp(-r / fwhm_pixels)
+    
+    return (moffat * spikes) / (moffat * spikes).sum()
+
+
+def apply_psf_pipeline(image_data, instrument='HST', psf_fwhm=2.0):
+    """Complete PSF pipeline"""
+    background = np.median(image_data)
+    image_bgsub = image_data - background
+    
+    clipped = sigma_clip(image_bgsub, sigma=3.0, maxiters=5)
+    image_clean = np.where(clipped.mask, np.median(image_bgsub), image_bgsub)
+    
+    psf_size = min(51, image_data.shape[0] // 4)
+    if instrument == 'JWST':
+        psf = jwst_psf_model(psf_size, psf_fwhm)
+    else:
+        psf = hst_psf_model(psf_size, psf_fwhm)
+    
+    from scipy.signal import convolve2d
+    image_psf = convolve2d(image_clean, psf, mode='same')
+    
+    image_final = (image_psf - image_psf.min()) / (image_psf.max() - image_psf.min() + 1e-9)
+    
+    return image_final, psf, {
+        'background': background,
+        'clipped_fraction': np.mean(clipped.mask)
+    }
+
+
+# ── IR TO VISIBLE SPECTRUM MAPPING ─────────────────────────────────────────────
+
+def ir_to_visible_colormap():
+    """Create colormap mapping IR (cold) to visible (hot) spectrum"""
+    colors = [
+        (0, 0, 1),      # Blue - cold (IR)
+        (0, 1, 1),      # Cyan
+        (0, 1, 0),      # Green
+        (1, 1, 0),      # Yellow
+        (1, 0, 0),      # Red - hot (visible)
+    ]
+    return LinearSegmentedColormap.from_list('ir_visible', colors, N=256)
+
+
+def map_ir_to_visible(image, temperature_map=None):
+    """Map IR intensity to visible spectrum (blue=cold, red=hot)"""
+    if temperature_map is None:
+        # Use image intensity as temperature proxy
+        temp = np.clip(image, 0, 1)
+    else:
+        temp = temperature_map
+    
+    # Create RGB mapping
+    rgb = np.zeros((*temp.shape, 3))
+    
+    # Cold (blue) to hot (red) gradient
+    rgb[:, :, 0] = temp  # Red channel increases with temperature
+    rgb[:, :, 1] = temp * 0.8  # Green peaks mid-range
+    rgb[:, :, 2] = 1 - temp  # Blue decreases with temperature
+    
+    return np.clip(rgb, 0, 1)
+
+
+# ── STEALTH DETECTION METHODS (from StealthPDPRadar) ─────────────────────────────────────────────
+
+def dark_mode_leakage_detection(image, epsilon=1e-10, B_field=1e15, m_dark=1e-9):
+    """
+    Dark-mode leakage detection from StealthPDPRadar
+    Extracts quantum signatures that reveal stealth objects
+    """
+    mixing = epsilon * B_field / (m_dark + 1e-12)
+    
+    # Quantum oscillation
+    quantum_sig = image * mixing * 5
+    dark_mode = np.clip(quantum_sig, 0, 1)
+    
+    # Enhanced detection (blue-halo IR fusion)
+    enhanced = image + dark_mode * 0.8
+    
+    # Detection confidence
+    confidence = np.max(dark_mode) * 100
+    
+    return dark_mode, enhanced, confidence
+
+
+def green_speck_entanglement(image, fringe=65):
+    """
+    Green-speck entanglement residuals
+    Extracts interference patterns from PDP mixing
+    """
+    # Create interference pattern
+    h, w = image.shape
+    y, x = np.ogrid[:h, :w]
+    cx, cy = w//2, h//2
+    r = np.sqrt((x - cx)**2 + (y - cy)**2) / max(h, w, 1)
+    theta = np.arctan2(y - cy, x - cx)
+    k = fringe / 20.0
+    
+    radial = np.sin(k * 2 * np.pi * r * 3)
+    spiral = np.sin(k * 2 * np.pi * (r + theta / (2 * np.pi)))
+    pattern = (radial * 0.5 + spiral * 0.5) * image
+    
+    return np.clip(pattern, 0, 1)
+
+
+def blue_halo_fusion(image, dark_mode):
+    """
+    Blue-halo IR fusion visualization
+    Combines conventional and quantum signatures
+    """
+    # Blue halo around detected quantum signatures
+    from scipy.ndimage import gaussian_filter
+    halo = gaussian_filter(dark_mode, sigma=5)
+    
+    # RGB: R=conventional, G=quantum, B=halo
+    rgb = np.stack([
+        image,
+        dark_mode * 0.8,
+        halo * 0.6
+    ], axis=-1)
+    
+    return np.clip(rgb, 0, 1)
+
+
+# ── QCI PHYSICS FUNCTIONS ─────────────────────────────────────────────
+
+def fdm_soliton(size, fringe):
     """FDM Soliton - ρ(r) ∝ [sin(kr)/(kr)]²"""
     h, w = size
     y, x = np.ogrid[:h, :w]
@@ -68,7 +220,7 @@ def fdm_soliton_core(size, fringe):
 
 
 def dark_photon_wave(size, fringe):
-    """Dark Photon Wave - λ = h/(m v) interference"""
+    """Dark Photon Wave - λ = h/(m v)"""
     h, w = size
     y, x = np.ogrid[:h, :w]
     cx, cy = w//2, h//2
@@ -80,98 +232,6 @@ def dark_photon_wave(size, fringe):
     spiral = np.sin(k * 2 * np.pi * (r + theta / (2 * np.pi)))
     pattern = radial * 0.5 + spiral * 0.5
     return (pattern - pattern.min()) / (pattern.max() - pattern.min() + 1e-9)
-
-
-def dark_matter_density(image, soliton):
-    """Dark Matter Density from gradients"""
-    smoothed = gaussian_filter(image, sigma=8)
-    grad_x = np.gradient(smoothed, axis=0)
-    grad_y = np.gradient(smoothed, axis=1)
-    gradient = np.sqrt(grad_x**2 + grad_y**2)
-    gradient = (gradient - gradient.min()) / (gradient.max() - gradient.min() + 1e-9)
-    return soliton * 0.6 + gradient * 0.4
-
-
-def pdp_entanglement(image, dark_photon, soliton, omega):
-    """Photon-Dark Photon entanglement mixing"""
-    mixing = omega * 0.6
-    result = image * (1 - mixing * 0.4)
-    result = result + dark_photon * mixing * 0.5
-    result = result + soliton * mixing * 0.4
-    return np.clip(result, 0, 1)
-
-
-def magnetar_field(B_surface, size=200, range_km=300):
-    """Magnetar dipole field visualization"""
-    x = np.linspace(-range_km, range_km, size)
-    y = np.linspace(-range_km, range_km, size)
-    X, Y = np.meshgrid(x, y)
-    R = np.sqrt(X**2 + Y**2) + 1e-9
-    Theta = np.arctan2(Y, X)
-    B0 = B_surface * (10 / R)**3
-    B_mag = B0 * np.sqrt(4 * np.cos(Theta)**2 + np.sin(Theta)**2)
-    return B_mag
-
-
-def stealth_radar_detection(image, epsilon=1e-10, B_field=1e15, m_dark=1e-9):
-    """PDP quantum radar detection"""
-    mixing = epsilon * B_field / (m_dark + 1e-12)
-    
-    # Use image as radar return proxy
-    quantum_sig = image * mixing * 5
-    dark_mode_leakage = np.clip(quantum_sig, 0, 1)
-    confidence = np.max(dark_mode_leakage) * 100
-    
-    return dark_mode_leakage, confidence
-
-
-def power_spectrum(image):
-    """Compute power spectrum P(k)"""
-    from scipy.fft import fft2, fftshift
-    fft = fft2(image)
-    power = np.abs(fft)**2
-    return fftshift(power)
-
-
-# ── ANNOTATION FUNCTION ─────────────────────────────────────────────
-
-def add_annotations(image_array, metadata, scale_kpc=100):
-    """Add physics annotations to image"""
-    img_pil = Image.fromarray((np.clip(image_array, 0, 1) * 255).astype(np.uint8)).convert('RGB')
-    draw = ImageDraw.Draw(img_pil)
-    
-    try:
-        font_small = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 12)
-        font_tiny = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 10)
-    except:
-        font_small = ImageFont.load_default()
-        font_tiny = ImageFont.load_default()
-    
-    h, w = image_array.shape[:2]
-    
-    # Scale bar
-    scale_bar_px = 100
-    scale_bar_kpc = (scale_bar_px / w) * scale_kpc
-    bar_y = h - 45
-    draw.rectangle([20, bar_y, 20 + scale_bar_px, bar_y + 6], fill='white')
-    draw.text((20 + 35, bar_y - 20), f"{scale_bar_kpc:.0f} kpc", fill='white', font=font_tiny)
-    
-    # North indicator
-    draw.line([w - 35, 30, w - 35, 65], fill='white', width=3)
-    draw.text((w - 45, 12), "N", fill='white', font=font_small)
-    
-    # Info box
-    info_lines = [
-        f"Ω = {metadata.get('omega', 0):.2f} | Fringe = {metadata.get('fringe', 0)}",
-        f"Mixing = {metadata.get('mixing', 0):.3f} | Entropy = {metadata.get('entropy', 0):.3f}",
-        f"λ_FDM = {scale_bar_kpc / max(metadata.get('fringe', 1), 1) * 8:.1f} kpc"
-    ]
-    
-    draw.rectangle([12, 12, 280, 12 + len(info_lines) * 24 + 8], fill=(0, 0, 0, 180), outline='white')
-    for i, line in enumerate(info_lines):
-        draw.text((18, 18 + i * 24), line, fill='cyan', font=font_tiny)
-    
-    return np.array(img_pil) / 255.0
 
 
 def load_image(uploaded_file):
@@ -191,14 +251,67 @@ def load_image(uploaded_file):
     return data
 
 
+def generate_sample(size=400):
+    """Generate sample astronomical image"""
+    img = np.zeros((size, size))
+    cx, cy = size//2, size//2
+    for i in range(size):
+        for j in range(size):
+            r = np.sqrt((i - cx)**2 + (j - cy)**2)
+            img[i, j] = np.exp(-r/60) + 0.2 * np.sin(r/25) * np.exp(-r/80)
+    img = img + np.random.randn(size, size) * 0.02
+    return (img - img.min()) / (img.max() - img.min())
+
+
+def add_annotations(image_array, metadata, scale_kpc=100):
+    """Add annotations to image"""
+    img_pil = Image.fromarray((np.clip(image_array, 0, 1) * 255).astype(np.uint8)).convert('RGB')
+    draw = ImageDraw.Draw(img_pil)
+    
+    try:
+        font_small = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 12)
+        font_tiny = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 10)
+    except:
+        font_small = ImageFont.load_default()
+        font_tiny = ImageFont.load_default()
+    
+    h, w = image_array.shape[:2]
+    
+    # Scale bar
+    scale_bar_px = 100
+    scale_bar_kpc = (scale_bar_px / w) * scale_kpc
+    bar_y = h - 45
+    draw.rectangle([20, bar_y, 20 + scale_bar_px, bar_y + 6], fill='black')
+    draw.text((20 + 35, bar_y - 20), f"{scale_bar_kpc:.0f} kpc", fill='black', font=font_tiny)
+    
+    # North indicator
+    draw.line([w - 35, 30, w - 35, 65], fill='black', width=3)
+    draw.text((w - 45, 12), "N", fill='black', font=font_small)
+    
+    # Info box
+    info_lines = [
+        f"Ω = {metadata.get('omega', 0):.2f} | Fringe = {metadata.get('fringe', 0)}",
+        f"Stealth Confidence: {metadata.get('stealth_conf', 0):.1f}%",
+        f"λ_FDM = {scale_bar_kpc / max(metadata.get('fringe', 1), 1) * 8:.1f} kpc"
+    ]
+    if metadata.get('instrument'):
+        info_lines.append(f"Instrument: {metadata['instrument']} | PSF: {metadata.get('psf_fwhm', 2.0):.1f} pix")
+    
+    draw.rectangle([12, 12, 280, 12 + len(info_lines) * 24 + 8], fill=(255, 255, 255, 200), outline='black')
+    for i, line in enumerate(info_lines):
+        draw.text((18, 18 + i * 24), line, fill='#1e3a5f', font=font_tiny)
+    
+    return np.array(img_pil) / 255.0
+
+
 # ── SIDEBAR ─────────────────────────────────────────────
 with st.sidebar:
-    st.title("🌌 QCAUS v4.0")
+    st.title("🔭 QCAUS v6.0")
     st.markdown("*Unified Quantum Suite*")
     st.markdown("---")
     
     # File upload
-    uploaded = st.file_uploader("📁 Upload Image", type=['fits', 'png', 'jpg', 'jpeg'])
+    uploaded = st.file_uploader("📁 Upload FITS/Image", type=['fits', 'png', 'jpg', 'jpeg'])
     
     st.markdown("---")
     st.markdown("### ⚛️ Physics Parameters")
@@ -208,325 +321,184 @@ with st.sidebar:
     scale_kpc = st.selectbox("Scale (kpc)", [50, 100, 150, 200], index=1)
     
     st.markdown("---")
-    st.markdown("### 🛸 Stealth Parameters")
-    epsilon = st.slider("Kinetic Mixing ε", 1e-12, 1e-8, 1e-10, format="%.1e")
-    m_dark = st.slider("Dark Photon Mass (eV)", 1e-12, 1e-6, 1e-9, format="%.1e")
+    st.markdown("### 🔭 PSF Pipeline")
+    use_pipeline = st.checkbox("Enable HST/JWST Pipeline", value=False)
+    if use_pipeline:
+        instrument = st.selectbox("Instrument", ["HST", "JWST"])
+        psf_fwhm = st.slider("PSF FWHM (pixels)", 1.0, 5.0, 2.0 if instrument == "HST" else 1.5)
     
     st.markdown("---")
-    st.markdown("### 🎛️ Layer Controls")
-    st.markdown("*Click checkboxes to toggle layers*")
+    st.markdown("### 🛸 Stealth Detection")
+    epsilon = st.slider("Kinetic Mixing ε", 1e-12, 1e-8, 1e-10, format="%.1e")
+    m_dark = st.slider("Dark Photon Mass (eV)", 1e-12, 1e-6, 1e-9, format="%.1e")
+    B_field = st.number_input("B Field (G)", value=1e15, format="%.1e")
     
-    st.caption("Tony Ford | QCAUS v4.0 | One Image → All Physics")
+    st.caption("Tony Ford | QCAUS v6.0")
 
 
 # ── MAIN APP ─────────────────────────────────────────────
-st.title("🌌 Quantum Cosmology & Astrophysics Unified Suite")
-st.markdown("*Upload one image → See all physics outputs | Toggle layers interactively*")
+st.title("🔭 Quantum Cosmology & Astrophysics Unified Suite")
+st.markdown("*HST/JWST Pipeline | IR Spectrum Mapping | Quantum Stealth Detection*")
 st.markdown("---")
 
+# Load image
 if uploaded is not None:
-    # Load image
     with st.spinner("Loading image..."):
         img_data = load_image(uploaded)
-        
-        # Resize
-        MAX_SIZE = 400
-        if img_data.shape[0] > MAX_SIZE or img_data.shape[1] > MAX_SIZE:
-            from skimage.transform import resize
-            img_data = resize(img_data, (MAX_SIZE, MAX_SIZE), preserve_range=True)
-    
-    st.success(f"✅ Loaded: {uploaded.name}")
-    
-    # ── GENERATE ALL PHYSICS LAYERS ─────────────────────────────────────────────
-    with st.spinner("Generating physics layers..."):
-        size = img_data.shape
-        soliton = fdm_soliton_core(size, fringe)
-        dark_photon = dark_photon_wave(size, fringe)
-        dark_matter = dark_matter_density(img_data, soliton)
-        pdp_result = pdp_entanglement(img_data, dark_photon, soliton, omega)
-        pdp_result = np.clip(pdp_result * brightness, 0, 1)
-        
-        # RGB composite (R=Image, G=Dark Photon, B=Dark Matter)
-        rgb_composite = np.stack([
-            pdp_result,
-            pdp_result * 0.3 + dark_photon * 0.5 + soliton * 0.2,
-            pdp_result * 0.2 + dark_matter * 0.6 + soliton * 0.2
-        ], axis=-1)
-        rgb_composite = np.clip(rgb_composite, 0, 1)
-        
-        # Magnetar field
-        magnetar = magnetar_field(1e15, size[0])
-        
-        # Stealth detection
-        stealth_map, stealth_conf = stealth_radar_detection(pdp_result, epsilon, 1e15, m_dark)
-        
-        # Power spectrum
-        power_spec = power_spectrum(pdp_result)
-        
-        # Entropy
-        mixing = omega * 0.6
-        entropy = -mixing * np.log(mixing + 1e-12)
-    
-    # Metrics row
-    st.markdown("### 📊 Physics Metrics")
-    col_m1, col_m2, col_m3, col_m4, col_m5, col_m6 = st.columns(6)
-    with col_m1:
-        st.metric("Soliton Peak", f"{soliton.max():.3f}")
-    with col_m2:
-        st.metric("Fringe Contrast", f"{dark_photon.std():.3f}")
-    with col_m3:
-        st.metric("Mixing Angle", f"{mixing:.3f}")
-    with col_m4:
-        st.metric("Entanglement Entropy", f"{entropy:.3f}")
-    with col_m5:
-        st.metric("Stealth Confidence", f"{stealth_conf:.1f}%")
-    with col_m6:
-        st.metric("DM Mean", f"{dark_matter.mean():.3f}")
-    
-    st.markdown("---")
-    
-    # ── INTERACTIVE LAYER TOGGLES ─────────────────────────────────────────────
-    st.markdown("### 🎨 Interactive Layers")
-    st.markdown("*Toggle layers on/off to see individual physics components*")
-    
-    # Layer toggles
-    col_t1, col_t2, col_t3, col_t4, col_t5, col_t6 = st.columns(6)
-    with col_t1:
-        show_original = st.checkbox("📷 Original", value=True)
-    with col_t2:
-        show_soliton = st.checkbox("⭐ Soliton", value=False)
-    with col_t3:
-        show_dark_photon = st.checkbox("🌊 Dark Photon", value=False)
-    with col_t4:
-        show_dark_matter = st.checkbox("🌌 Dark Matter", value=False)
-    with col_t5:
-        show_pdp = st.checkbox("✨ PDP Entangled", value=True)
-    with col_t6:
-        show_stealth = st.checkbox("🛸 Stealth Map", value=False)
-    
-    # Build composite image based on toggles
-    composite = np.zeros((*size, 3))
-    
-    if show_original:
-        composite[:, :, 0] += img_data * 0.8
-        composite[:, :, 1] += img_data * 0.8
-        composite[:, :, 2] += img_data * 0.8
-    
-    if show_soliton:
-        composite[:, :, 0] += soliton * 0.7
-        composite[:, :, 1] += soliton * 0.3
-        composite[:, :, 2] += soliton * 0.2
-    
-    if show_dark_photon:
-        composite[:, :, 0] += dark_photon * 0.3
-        composite[:, :, 1] += dark_photon * 0.7
-        composite[:, :, 2] += dark_photon * 0.2
-    
-    if show_dark_matter:
-        composite[:, :, 0] += dark_matter * 0.2
-        composite[:, :, 1] += dark_matter * 0.3
-        composite[:, :, 2] += dark_matter * 0.8
-    
-    if show_pdp:
-        composite[:, :, 0] += pdp_result * 0.9
-        composite[:, :, 1] += pdp_result * 0.7
-        composite[:, :, 2] += pdp_result * 0.5
-    
-    if show_stealth:
-        composite[:, :, 0] += stealth_map * 0.9
-        composite[:, :, 1] += stealth_map * 0.3
-        composite[:, :, 2] += stealth_map * 0.2
-    
-    composite = np.clip(composite, 0, 1)
-    
-    # Display composite with annotations
-    metadata = {'omega': omega, 'fringe': fringe, 'mixing': mixing, 'entropy': entropy}
-    annotated = add_annotations(composite, metadata, scale_kpc)
-    
-    st.markdown("### 🔭 Live Composite View")
-    st.image(annotated, use_container_width=True)
-    
-    # Legend
-    st.markdown("""
-    <div style="background-color: #1a1a3a; padding: 10px; border-radius: 8px; margin-top: 10px;">
-    <b>🎨 Layer Legend:</b>
-    <span style="color:#ff8888"> Red: PDP Entangled / Original</span> • 
-    <span style="color:#88ff88"> Green: Dark Photon Field</span> • 
-    <span style="color:#8888ff"> Blue: Dark Matter Density</span> • 
-    <span style="color:#ffaa44"> Orange/Yellow: FDM Soliton</span> • 
-    <span style="color:#ff4444"> Bright Red: Stealth Detection</span>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    # ── ALL PHYSICS OUTPUTS (Grid View) ─────────────────────────────────────────────
-    st.markdown("### 📊 All Physics Outputs")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        fig, ax = plt.subplots(figsize=(4, 4), facecolor='#0a0a1a')
-        ax.imshow(img_data, cmap='gray')
-        ax.set_title("Original Image", color='white')
-        ax.axis('off')
-        st.pyplot(fig)
-        plt.close(fig)
-        
-        fig, ax = plt.subplots(figsize=(4, 4), facecolor='#0a0a1a')
-        ax.imshow(soliton, cmap='hot')
-        ax.set_title("FDM Soliton Core", color='white')
-        ax.axis('off')
-        st.pyplot(fig)
-        plt.close(fig)
-    
-    with col2:
-        fig, ax = plt.subplots(figsize=(4, 4), facecolor='#0a0a1a')
-        ax.imshow(dark_photon, cmap='plasma')
-        ax.set_title("Dark Photon Field", color='white')
-        ax.axis('off')
-        st.pyplot(fig)
-        plt.close(fig)
-        
-        fig, ax = plt.subplots(figsize=(4, 4), facecolor='#0a0a1a')
-        ax.imshow(dark_matter, cmap='viridis')
-        ax.set_title("Dark Matter Density", color='white')
-        ax.axis('off')
-        st.pyplot(fig)
-        plt.close(fig)
-    
-    with col3:
-        fig, ax = plt.subplots(figsize=(4, 4), facecolor='#0a0a1a')
-        ax.imshow(pdp_result, cmap='inferno')
-        ax.set_title("PDP Entangled", color='white')
-        ax.axis('off')
-        st.pyplot(fig)
-        plt.close(fig)
-        
-        fig, ax = plt.subplots(figsize=(4, 4), facecolor='#0a0a1a')
-        ax.imshow(stealth_map, cmap='hot')
-        ax.set_title(f"Stealth Map ({stealth_conf:.0f}% confidence)", color='white')
-        ax.axis('off')
-        st.pyplot(fig)
-        plt.close(fig)
-    
-    # ── ADDITIONAL PHYSICS VISUALIZATIONS ─────────────────────────────────────────────
-    st.markdown("---")
-    st.markdown("### 🔬 Advanced Physics")
-    
-    col_a, col_b = st.columns(2)
-    
-    with col_a:
-        st.markdown("**Magnetar Field**")
-        fig, ax = plt.subplots(figsize=(6, 5), facecolor='#0a0a1a')
-        im = ax.imshow(magnetar, cmap='plasma')
-        ax.set_title("Magnetar Dipole Field", color='white')
-        ax.axis('off')
-        plt.colorbar(im, ax=ax, fraction=0.046, label="|B| (G)")
-        st.pyplot(fig)
-        plt.close(fig)
-        
-        st.markdown("**Power Spectrum**")
-        fig, ax = plt.subplots(figsize=(6, 5), facecolor='#0a0a1a')
-        ax.imshow(np.log(power_spec + 1), cmap='hot')
-        ax.set_title("P(k) Power Spectrum", color='white')
-        ax.axis('off')
-        st.pyplot(fig)
-        plt.close(fig)
-    
-    with col_b:
-        st.markdown("**Primordial Entanglement Evolution**")
-        t = np.linspace(0, 1, 200)
-        mixing_evo = 0.6 * (1 - np.exp(-70 * t))
-        entropy_evo = -mixing_evo * np.log(mixing_evo + 1e-12)
-        
-        fig, ax = plt.subplots(figsize=(6, 4), facecolor='#0a0a1a')
-        ax.plot(t, mixing_evo, 'r-', linewidth=2, label='Mixing')
-        ax.plot(t, entropy_evo, 'b-', linewidth=2, label='Entropy')
-        ax.set_xlabel("Scale Factor", color='white')
-        ax.set_ylabel("Amplitude", color='white')
-        ax.set_title("von Neumann Evolution", color='#00aaff')
-        ax.legend()
-        ax.grid(True, alpha=0.3)
-        st.pyplot(fig)
-        plt.close(fig)
-        
-        st.markdown("**Quantum-Corrected Power Spectrum**")
-        k = np.logspace(-3, 0, 100)
-        P_lcdm = 2.1e-9 * (k / 0.05)**(0.965 - 1)
-        P_quantum = P_lcdm * (1 + omega * (k / 0.05)**0.8)
-        
-        fig, ax = plt.subplots(figsize=(6, 4), facecolor='#0a0a1a')
-        ax.loglog(k, P_lcdm, 'b-', linewidth=2, label='ΛCDM')
-        ax.loglog(k, P_quantum, 'r-', linewidth=2, label='Quantum-corrected')
-        ax.fill_between(k, P_lcdm, P_quantum, alpha=0.3, color='red')
-        ax.set_xlabel("k (Mpc⁻¹)", color='white')
-        ax.set_ylabel("P(k)", color='white')
-        ax.set_title("Matter Power Spectrum", color='#00aaff')
-        ax.legend()
-        ax.grid(True, alpha=0.3)
-        st.pyplot(fig)
-        plt.close(fig)
-    
-    # ── DOWNLOAD ─────────────────────────────────────────────
-    st.markdown("---")
-    st.markdown("### 💾 Download Results")
-    
-    def save_array_png(arr, cmap='inferno'):
-        fig, ax = plt.subplots(figsize=(8, 8), facecolor='black')
-        if len(arr.shape) == 3:
-            ax.imshow(np.clip(arr, 0, 1))
-        else:
-            ax.imshow(arr, cmap=cmap, vmin=0, vmax=1)
-        ax.axis('off')
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', bbox_inches='tight', facecolor='black')
-        plt.close(fig)
-        return buf.getvalue()
-    
-    col_d1, col_d2, col_d3, col_d4 = st.columns(4)
-    
-    with col_d1:
-        st.download_button("📸 Composite View", save_array_png(annotated), "qcaus_composite.png")
-    with col_d2:
-        st.download_button("⭐ FDM Soliton", save_array_png(soliton, 'hot'), "soliton.png")
-    with col_d3:
-        st.download_button("🌊 Dark Photon", save_array_png(dark_photon, 'plasma'), "dark_photon.png")
-    with col_d4:
-        st.download_button("🛸 Stealth Map", save_array_png(stealth_map, 'hot'), "stealth_map.png")
-
+        st.success(f"✅ Loaded: {uploaded.name}")
 else:
-    st.info("""
-    ## 📁 **Upload an image to get started**
-    
-    **This unified app combines all QCAUS physics in one page:**
-    
-    | Layer | Physics | Visualization |
-    |-------|---------|---------------|
-    | **FDM Soliton** | ρ(r) ∝ [sin(kr)/kr]² | Orange/Yellow core |
-    | **Dark Photon** | λ = h/(m v) interference | Green wave patterns |
-    | **Dark Matter** | ∇²Φ = 4πGρ | Blue density map |
-    | **PDP Entangled** | Quantum mixing | Red/Purple enhanced |
-    | **Stealth Map** | Dark-mode leakage | Bright red detection |
-    
-    **Interactive Features:**
-    - ✅ Toggle layers on/off
-    - ✅ Real-time composite view
-    - ✅ All physics outputs displayed
-    - ✅ Download any layer as PNG
-    """)
-    
-    # Show example of what to expect
-    with st.expander("📖 Quick Start Guide"):
-        st.markdown("""
-        1. **Upload an image** (FITS, PNG, JPG)
-        2. **Adjust physics parameters** in sidebar
-        3. **Toggle layers** to see individual components
-        4. **View all outputs** in the grid below
-        5. **Download results** as PNG files
-        
-        **Recommended first image:** Any galaxy cluster (Bullet Cluster, Abell 1689) or nebula (Crab Nebula)
-        """)
+    img_data = generate_sample()
+    st.info("📸 Using sample image. Upload your own FITS/Image to analyze.")
+
+# Resize
+if img_data.shape[0] > 500:
+    from skimage.transform import resize
+    img_data = resize(img_data, (500, 500), preserve_range=True)
+
+# Apply PSF pipeline if enabled
+if use_pipeline:
+    with st.spinner("Applying HST/JWST PSF pipeline..."):
+        img_processed, psf, pipeline_stats = apply_psf_pipeline(img_data, instrument, psf_fwhm)
+        st.caption(f"🔧 {instrument} PSF: background={pipeline_stats['background']:.4f}, cosmic rays={pipeline_stats['clipped_fraction']:.1%}")
+else:
+    img_processed = img_data
+    psf = None
+
+# Generate all physics layers
+size = img_processed.shape
+soliton = fdm_soliton(size, fringe)
+dark_photon = dark_photon_wave(size, fringe)
+
+# Stealth detection methods
+dark_mode, stealth_enhanced, stealth_conf = dark_mode_leakage_detection(img_processed, epsilon, B_field, m_dark)
+green_speck = green_speck_entanglement(img_processed, fringe)
+blue_halo_rgb = blue_halo_fusion(img_processed, dark_mode)
+
+# PDP entanglement result
+mixing = omega * 0.6
+pdp_result = img_processed * (1 - mixing * 0.4)
+pdp_result = pdp_result + dark_photon * mixing * 0.5
+pdp_result = pdp_result + soliton * mixing * 0.4
+pdp_result = np.clip(pdp_result * brightness, 0, 1)
+
+# IR to Visible mapping
+ir_visible = map_ir_to_visible(pdp_result)
+
+# RGB composite with all detection methods
+rgb_composite = np.stack([
+    pdp_result * 0.6 + dark_mode * 0.4,      # Red: PDP + dark-mode
+    pdp_result * 0.3 + green_speck * 0.5,    # Green: green-speck entanglement
+    pdp_result * 0.2 + dark_mode * 0.5       # Blue: dark-mode halo
+], axis=-1)
+rgb_composite = np.clip(rgb_composite, 0, 1)
+
+# Annotations
+metadata = {
+    'omega': omega, 'fringe': fringe,
+    'stealth_conf': stealth_conf,
+    'instrument': instrument if use_pipeline else None,
+    'psf_fwhm': psf_fwhm if use_pipeline else None
+}
+annotated = add_annotations(rgb_composite, metadata, scale_kpc)
+
+# ── DISPLAY RESULTS ─────────────────────────────────────────────
+st.markdown("### 🔭 Enhanced Quantum View")
+st.image(annotated, use_container_width=True)
+
+# Metrics row
+st.markdown("### 📊 Detection Metrics")
+col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
+with col_m1:
+    st.metric("Stealth Confidence", f"{stealth_conf:.1f}%")
+with col_m2:
+    st.metric("Soliton Peak", f"{soliton.max():.3f}")
+with col_m3:
+    st.metric("Fringe Contrast", f"{dark_photon.std():.3f}")
+with col_m4:
+    st.metric("Mixing Angle", f"{mixing:.3f}")
+with col_m5:
+    st.metric("Quantum Signature", f"{dark_mode.max():.4f}")
+
+# Threat assessment
+if stealth_conf > 50:
+    st.error(f"⚠️ HIGH ALERT: Stealth signature detected with {stealth_conf:.0f}% confidence")
+elif stealth_conf > 20:
+    st.warning(f"⚠️ MEDIUM ALERT: Possible stealth signature ({stealth_conf:.0f}% confidence)")
+elif stealth_conf > 5:
+    st.info(f"ℹ️ LOW ALERT: Weak quantum signature detected")
+else:
+    st.success(f"✅ CLEAR: No stealth signatures detected")
 
 st.markdown("---")
-st.markdown("🔭 **QCAUS v4.0** | Unified Quantum Suite | One Image → All Physics | Tony Ford Model")
+
+# ── ALL PHYSICS OUTPUTS (Grid) ─────────────────────────────────────────────
+st.markdown("### 📊 All Physics Outputs")
+
+col1, col2, col3 = st.columns(3)
+
+def show_img(img, title, cmap=None):
+    fig, ax = plt.subplots(figsize=(4, 4))
+    if len(img.shape) == 3:
+        ax.imshow(np.clip(img, 0, 1))
+    else:
+        ax.imshow(img, cmap=cmap, vmin=0, vmax=1)
+    ax.set_title(title)
+    ax.axis('off')
+    st.pyplot(fig)
+    plt.close(fig)
+
+with col1:
+    show_img(img_data, "Original Image", 'gray')
+    show_img(soliton, "FDM Soliton Core", 'hot')
+    show_img(dark_photon, "Dark Photon Field", 'plasma')
+
+with col2:
+    show_img(pdp_result, "PDP Entangled", 'inferno')
+    show_img(dark_mode, "Dark-Mode Leakage", 'hot')
+    show_img(green_speck, "Green-Speck Entanglement", 'viridis')
+
+with col3:
+    show_img(ir_visible, "IR → Visible Spectrum", None)
+    show_img(blue_halo_rgb, "Blue-Halo IR Fusion", None)
+    show_img(rgb_composite, "Full Quantum Composite", None)
+
+# Show PSF if available
+if use_pipeline and psf is not None:
+    st.markdown("---")
+    st.markdown("### 🔭 PSF Model")
+    fig, ax = plt.subplots(figsize=(4, 4))
+    ax.imshow(psf, cmap='hot')
+    ax.set_title(f"{instrument} PSF Model (FWHM={psf_fwhm:.1f} pix)")
+    ax.axis('off')
+    st.pyplot(fig)
+    plt.close(fig)
+
+# ── DOWNLOAD ─────────────────────────────────────────────
+st.markdown("---")
+st.markdown("### 💾 Download Results")
+
+def save_array_png(arr, cmap='inferno'):
+    fig, ax = plt.subplots(figsize=(8, 8))
+    if len(arr.shape) == 3:
+        ax.imshow(np.clip(arr, 0, 1))
+    else:
+        ax.imshow(arr, cmap=cmap, vmin=0, vmax=1)
+    ax.axis('off')
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight')
+    plt.close(fig)
+    return buf.getvalue()
+
+col_d1, col_d2, col_d3, col_d4 = st.columns(4)
+
+with col_d1:
+    st.download_button("📸 Quantum Composite", save_array_png(rgb_composite), "qcaus_composite.png")
+with col_d2:
+    st.download_button("🌊 Dark-Mode Leakage", save_array_png(dark_mode, 'hot'), "dark_mode.png")
+with col_d3:
+    st.download_button("⭐ FDM Soliton", save_array_png(soliton, 'hot'), "soliton.png")
+with col_d4:
+    st.download_button("🌈 IR Visible Map", save_array_png(ir_visible), "ir_visible.png")
+
+st.markdown("---")
+st.markdown("🔭 **QCAUS v6.0** | HST/JWST Pipeline | IR Spectrum | Stealth Detection | Tony Ford Model")

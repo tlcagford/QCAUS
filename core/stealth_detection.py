@@ -8,16 +8,16 @@ from .pdp_physics import pdp_mixing_angle, pdp_conversion_probability
 
 # Stealth platform signatures
 US_STEALTH_PLATFORMS = {
-    "F-22 Raptor": {"rcs": 0.0001, "speed": 520, "altitude": 38000, "callsigns": ["AF", "RCH"]},
-    "F-35 Lightning II": {"rcs": 0.001, "speed": 550, "altitude": 35000, "callsigns": ["AF", "RCH", "NAVY"]},
-    "B-21 Raider": {"rcs": 0.0005, "speed": 520, "altitude": 40000, "callsigns": ["RCH", "AF"]},
-    "B-2 Spirit": {"rcs": 0.0002, "speed": 475, "altitude": 40000, "callsigns": ["RCH"]},
-    "NGAD": {"rcs": 0.0003, "speed": 650, "altitude": 45000, "callsigns": ["AF"]}
+    "F-22 Raptor": {"rcs": 0.0001, "speed": 520, "altitude": 38000, "callsigns": ["AF", "RCH"], "operator": "USAF"},
+    "F-35 Lightning II": {"rcs": 0.001, "speed": 550, "altitude": 35000, "callsigns": ["AF", "RCH", "NAVY"], "operator": "USAF/USN/USMC"},
+    "B-21 Raider": {"rcs": 0.0005, "speed": 520, "altitude": 40000, "callsigns": ["RCH", "AF"], "operator": "USAF"},
+    "B-2 Spirit": {"rcs": 0.0002, "speed": 475, "altitude": 40000, "callsigns": ["RCH"], "operator": "USAF"},
+    "NGAD": {"rcs": 0.0003, "speed": 650, "altitude": 45000, "callsigns": ["AF"], "operator": "USAF"}
 }
 
 FOREIGN_STEALTH = {
-    "Su-57": {"rcs": 0.01, "speed": 520, "altitude": 38000},
-    "J-20": {"rcs": 0.008, "speed": 530, "altitude": 37000}
+    "Su-57": {"rcs": 0.01, "speed": 520, "altitude": 38000, "operator": "Russian Air Force"},
+    "J-20": {"rcs": 0.008, "speed": 530, "altitude": 37000, "operator": "PLAAF"}
 }
 
 
@@ -57,7 +57,7 @@ def detect_stealth_aircraft(aircraft_data, epsilon=1e-10, B_field=1e15, m_dark=1
             ac['stealth_prob'] = min(base_prob * best_score, 99)
             ac['detected_platform'] = best_match if ac['stealth_prob'] > 20 else None
             ac['is_stealth'] = ac['stealth_prob'] > 20
-            ac['operator'] = US_STEALTH_PLATFORMS.get(best_match, {}).get('operator', 'USAF') if best_match in US_STEALTH_PLATFORMS else ""
+            ac['operator'] = platforms.get(best_match, {}).get('operator', '') if best_match else ''
     
     return aircraft_data
 

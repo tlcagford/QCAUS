@@ -4,7 +4,7 @@ All fundamental constants used across QCAUS
 """
 
 import numpy as np
-from scipy.constants import c, hbar, e, m_e, alpha, pi
+from scipy.constants import c, hbar, e, m_e, alpha, pi, G
 
 # ============================================
 # QUANTUM ELECTRODYNAMICS
@@ -41,12 +41,15 @@ rho_crit = 9.2e-30
 # Planck mass (eV)
 m_planck = 1.22e28
 
-# ============================================
-# ASTROPHYSICAL CONSTANTS
-# ============================================
+# Gravitational constant in kpc/(M_sun) (km/s)^2
+G_newton = G  # 6.67430e-11 m^3 kg^-1 s^-2
 
 # Solar mass (kg)
 M_sun = 1.989e30
+
+# ============================================
+# ASTROPHYSICAL CONSTANTS
+# ============================================
 
 # Solar radius (km)
 R_sun = 6.96e5
@@ -65,7 +68,9 @@ kpc_to_km = 3.086e16
 m_fdm_typical = 1e-22
 
 # FDM de Broglie wavelength (kpc)
-lambda_dB = lambda m: 2 * np.pi * hbar * c / (m * 1.602e-19) / kpc_to_km
+def lambda_dB(mass):
+    """de Broglie wavelength in kpc"""
+    return 2 * np.pi * hbar * c / (mass * 1.602e-19) / kpc_to_km
 
 # ============================================
 # HELPER FUNCTIONS

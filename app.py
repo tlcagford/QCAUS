@@ -6,8 +6,9 @@ import io
 import base64
 import warnings
 from datetime import datetime
-import plotly.graph_objects as go
-import plotly.express as px
+from scipy.signal import find_peaks
+from scipy.fft import fft2, ifft2, fftshift
+from scipy.ndimage import gaussian_filter
 
 warnings.filterwarnings("ignore")
 
@@ -107,12 +108,10 @@ def pdp_entanglement_overlay(image: np.ndarray, interference: np.ndarray,
         soliton = np.stack([soliton] * 3, axis=-1)
     
     # Apply FDM mass effect on fringe spacing
-    # FDM mass affects the oscillation frequency: k_eff = k * (1 + m_FDM/m_0)
     mass_scale = 1.0 / (1.0 + fdm_mass / 1e-22)
     interference = interference * mass_scale
     
     # Kinetic mixing affects coupling strength
-    # κ modifies the interaction cross-section
     mix_scale = 1.0 + kinetic_mixing / 1e-12
     interference = interference * mix_scale
     
@@ -129,10 +128,8 @@ def pdp_entanglement_overlay(image: np.ndarray, interference: np.ndarray,
 def blue_halo_fusion(img: np.ndarray, dark_mode: bool, entanglement: np.ndarray) -> np.ndarray:
     """Blue halo fusion effect from original pdp_radar_core.py"""
     if dark_mode:
-        # Dark mode: stronger entanglement influence
         return np.clip(img * 0.7 + entanglement * 0.3, 0, 1)
     else:
-        # Light mode: subtle entanglement influence
         return np.clip(img * 0.9 + entanglement * 0.1, 0, 1)
 
 def quantum_entanglement_entropy(wavefunction: np.ndarray) -> float:
@@ -169,8 +166,8 @@ def pdp_radar_core(image: np.ndarray, interference: np.ndarray,
     results['soliton_amplitude'] = np.max(soliton)
     
     # Coherence length
-    coherence = np.fft.fft2(interference)
-    coherence_shift = np.fft.fftshift(coherence)
+    coherence = fft2(interference)
+    coherence_shift = fftshift(coherence)
     results['coherence_length'] = np.sum(np.abs(coherence_shift) ** 2) / (np.sum(np.abs(interference)) + 1e-10)
     
     # PDP correlation function
@@ -179,11 +176,11 @@ def pdp_radar_core(image: np.ndarray, interference: np.ndarray,
     
     return results
 
-def generate_quantum_spectrum(interference: np.ndarray, fdm_mass: float) -> go.Figure:
-    """Generate quantum power spectrum with FDM effects"""
+def generate_quantum_spectrum(interference: np.ndarray, fdm_mass: float):
+    """Generate quantum power spectrum with FDM effects using matplotlib"""
     # FFT of interference pattern
-    fft_data = np.fft.fft2(interference)
-    fft_shift = np.fft.fftshift(fft_data)
+    fft_data = fft2(interference)
+    fft_shift = fftshift(fft_data)
     power_spectrum = np.abs(fft_shift) ** 2
     
     # Apply FDM mass effect on spectrum
@@ -194,24 +191,17 @@ def generate_quantum_spectrum(interference: np.ndarray, fdm_mass: float) -> go.F
     k_rad = np.sqrt(KX**2 + KY**2)
     
     # FDM modifies the power spectrum: P(k) → P(k) * (1 + (k/k_FDM)^4)^-1
-    k_fdm = fdm_mass / 1e-22  # Characteristic FDM scale
+    k_fdm = fdm_mass / 1e-22
     fdm_filter = 1.0 / (1.0 + (k_rad / (k_fdm + 1e-10))**4)
     modified_spectrum = power_spectrum * fdm_filter
     
-    # Create interactive plot
-    fig = go.Figure(data=go.Heatmap(
-        z=np.log(modified_spectrum + 1),
-        colorscale='Viridis',
-        colorbar_title='log(Power)'
-    ))
-    
-    fig.update_layout(
-        title='Quantum Power Spectrum with FDM Effects',
-        xaxis_title='k_x',
-        yaxis_title='k_y',
-        width=500,
-        height=500
-    )
+    # Create matplotlib figure
+    fig, ax = plt.subplots(figsize=(8, 6))
+    im = ax.imshow(np.log(modified_spectrum + 1), cmap='viridis', aspect='auto')
+    ax.set_title('Quantum Power Spectrum with FDM Effects')
+    ax.set_xlabel('k_x')
+    ax.set_ylabel('k_y')
+    plt.colorbar(im, ax=ax, label='log(Power)')
     
     return fig
 
@@ -228,7 +218,6 @@ def entanglement_fringe_analysis(image: np.ndarray, interference: np.ndarray,
         center_line = interference[interference.shape[0] // 2, :]
     
     # Find peaks in fringe pattern
-    from scipy.signal import find_peaks
     peaks, _ = find_peaks(center_line, height=0.5)
     
     if len(peaks) > 1:
@@ -365,6 +354,8 @@ def main():
             st.latex(r"m_{\text{FDM}} \sim 10^{-22} \text{ eV} \quad \text{(FDM Mass)}")
             st.latex(r"\text{Entanglement: } \rho = |\psi\rangle\langle\psi|")
             st.latex(r"S = -\text{Tr}(\rho \log \rho) \quad \text{(Entropy)}")
+            st.latex(r"\text{Overlay: } I_{\text{out}} = I_0(1-0.4m) + I_{\text{int}}0.5m + I_{\text{sol}}0.4m")
+            st.latex(r"m = 0.6\omega \quad \text{(Mixing Strength)}")
         
         # Update session state
         st.session_state.omega_pd = omega_pd
@@ -540,7 +531,7 @@ def main():
                 # Quantum Power Spectrum
                 st.subheader("⚡ Quantum Power Spectrum")
                 fig = generate_quantum_spectrum(interference, st.session_state.fdm_mass)
-                st.plotly_chart(fig, use_container_width=True)
+                st.pyplot(fig)
                 
                 # Additional analysis
                 with st.expander("📐 Detailed Analysis"):
@@ -623,7 +614,6 @@ def main():
                     else:
                         test_line = test_interference[test_interference.shape[0] // 2, :]
                     
-                    from scipy.signal import find_peaks
                     peaks, _ = find_peaks(test_line, height=0.5)
                     if len(peaks) > 1:
                         spacing = np.mean(np.diff(peaks))
@@ -729,15 +719,13 @@ def main():
                     ax[0].set_title('Interference Pattern')
                     ax[0].axis('off')
                     
-                    # 3D perspective
-                    from mpl_toolkits.mplot3d import Axes3D
-                    X = np.linspace(0, interference_pattern.shape[1], interference_pattern.shape[1])
-                    Y = np.linspace(0, interference_pattern.shape[0], interference_pattern.shape[0])
-                    X, Y = np.meshgrid(X, Y)
-                    
-                    ax2 = fig.add_subplot(122, projection='3d')
-                    ax2.plot_surface(X, Y, interference_pattern[:50, :50], cmap='viridis')
-                    ax2.set_title('3D Interference View')
+                    # Show profile
+                    center_line = interference_pattern[interference_pattern.shape[0] // 2, :]
+                    ax[1].plot(center_line, 'b-', linewidth=2)
+                    ax[1].set_xlabel('Pixel')
+                    ax[1].set_ylabel('Intensity')
+                    ax[1].set_title('Central Profile')
+                    ax[1].grid(True, alpha=0.3)
                 
                 else:  # Soliton Field
                     if len(soliton.shape) == 3:

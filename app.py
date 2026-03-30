@@ -250,7 +250,7 @@ def main():
     
     try:
         st.set_page_config(
-            page_title="Quantum Causality Analysis - PDP Entanglement",
+            page_title="QCAUS v1.0 – Quantum Cosmology & Astrophysics Unified Suite",
             page_icon="🔬",
             layout="wide",
             initial_sidebar_state="expanded"
@@ -259,7 +259,7 @@ def main():
         pass
     
     # Title and header
-    st.title("🔬 Quantum Causality Analysis - PDP Entanglement")
+    st.title("🔬 QCAUS v1.0 – Quantum Cosmology & Astrophysics Unified Suite")
     st.markdown("### Probing Dark Matter through Quantum Entanglement Fringes")
     st.markdown("---")
     

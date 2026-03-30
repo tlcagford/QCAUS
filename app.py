@@ -470,6 +470,80 @@ if uploaded_file is not None or preset_data:
         st.metric("Kinetic mixing ε", f"{magnetar_eps:.3f}")
     
     # EM Spectrum Mapping
+st.markdown("## 🌈 Electromagnetic Spectrum Mapping")
+st.markdown("*Infrared → Visible → X-ray | Dark Leakage = Equal & Opposite Quantum Signature*")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("### EM Spectrum Composite (R=IR, G=Visible, B=X-ray)")
+    try:
+        # Create scientific RGB composite with proper colors
+        rgb_composite = create_scientific_rgb_composite(img)
+        st.image(rgb_composite, caption="Multi-wavelength Composite", use_container_width=True)
+        
+        # Add explanation
+        st.markdown("""
+        **Color Mapping:**
+        - 🔴 **Red**: Infrared (thermal emission from dust)
+        - 🟢 **Green**: Visible (starlight/optical)
+        - 🔵 **Blue**: X-ray (hot gas/ high energy)
+        """)
+    except Exception as e:
+        st.error(f"Error creating EM composite: {str(e)}")
+
+with col2:
+    st.markdown("### EM Spectrum Layers")
+    
+    # Create individual spectrum layers with proper colors
+    if len(img.shape) == 3:
+        img_gray = np.mean(img.astype(np.float32) / 255.0, axis=2)
+    else:
+        img_gray = img.astype(np.float32) / 255.0
+    
+    # Create colored layers
+    xray_colored = np.zeros((img_gray.shape[0], img_gray.shape[1], 3))
+    xray_colored[:, :, 2] = img_gray ** 1.2  # Blue channel for X-ray
+    
+    visible_colored = np.zeros((img_gray.shape[0], img_gray.shape[1], 3))
+    visible_colored[:, :, 0] = img_gray ** 0.8  # Red
+    visible_colored[:, :, 1] = img_gray ** 0.8  # Green
+    visible_colored[:, :, 2] = img_gray ** 0.9  # Blue
+    
+    infrared_colored = np.zeros((img_gray.shape[0], img_gray.shape[1], 3))
+    infrared_colored[:, :, 0] = img_gray ** 0.5  # Red channel for IR
+    
+    # Create tabs for different layers
+    tab1, tab2, tab3 = st.tabs(["🔴 Infrared (Cold)", "🟢 Visible", "🔵 X-ray (Hot)"])
+    
+    with tab1:
+        st.image(infrared_colored, caption="Infrared (Cold)\nLong wavelength | Thermal emission | Red color", 
+                use_container_width=True)
+        st.markdown("*Dust and cool gas emission*")
+    
+    with tab2:
+        st.image(visible_colored, caption="Visible (Human Eye)\nOptical wavelength | Starlight", 
+                use_container_width=True)
+        st.markdown("*Stars and galaxies*")
+    
+    with tab3:
+        st.image(xray_colored, caption="X-ray (Hot)\nShort wavelength | High energy | Blue color", 
+                use_container_width=True)
+        st.markdown("*Hot plasma, shocks, and high-energy processes*")
+
+# Add additional scientific explanation
+st.markdown("---")
+st.markdown("""
+### 📡 Scientific Color Interpretation
+
+The colors in astronomical images are often assigned to represent different physical processes:
+
+- **X-ray (Blue)**: Traces hot gas (millions of degrees) from supernova remnants, galaxy clusters, and active galactic nuclei
+- **Visible (Green)**: Shows stars, galaxies, and optical light from various sources
+- **Infrared (Red)**: Reveals cool dust, star-forming regions, and objects obscured by dust
+
+This multi-wavelength approach allows astronomers to study different physical phenomena simultaneously.
+""")
     st.markdown("## 🌈 Electromagnetic Spectrum Mapping")
     st.markdown("*Infrared → Visible → X-ray | Dark Leakage = Equal & Opposite Quantum Signature*")
     
@@ -523,3 +597,98 @@ else:
 # Footer
 st.markdown("---")
 st.markdown("🔭 QCAUS v1.0 — Quantum Cosmology & Astrophysics Unified Suite")
+# Enhanced electromagnetic spectrum mapping with proper colors
+def create_em_composite_colored(img):
+    """Create EM spectrum composite with proper color mapping"""
+    if len(img.shape) == 3:
+        img_float = img.astype(np.float32) / 255.0
+        # Convert to grayscale for spectral mapping
+        img_gray = np.mean(img_float, axis=2)
+    else:
+        img_gray = img.astype(np.float32) / 255.0
+    
+    # Apply different colormaps for different spectral bands
+    # X-ray: Blue/purple (high energy)
+    xray_cmap = plt.cm.plasma(img_gray)
+    xray = xray_cmap[:, :, :3]  # Remove alpha channel
+    
+    # Visible: Natural colors (green/red)
+    visible_cmap = plt.cm.viridis(img_gray)
+    visible = visible_cmap[:, :, :3]
+    
+    # Infrared: Red/orange (low energy)
+    ir_cmap = plt.cm.inferno(img_gray)
+    infrared = ir_cmap[:, :, :3]
+    
+    return xray, visible, infrared
+
+# Or create a more realistic multi-wavelength composite
+def create_multi_wavelength_composite(img):
+    """Create realistic multi-wavelength composite with proper colors"""
+    if len(img.shape) == 3:
+        img_float = img.astype(np.float32) / 255.0
+        img_gray = np.mean(img_float, axis=2)
+    else:
+        img_gray = img.astype(np.float32) / 255.0
+    
+    # Simulate different physical processes at different wavelengths
+    # X-ray: Hot gas (blue/purple) - typically from shock heating
+    xray = np.zeros((img_gray.shape[0], img_gray.shape[1], 3))
+    xray[:, :, 0] = img_gray ** 1.5 * 0.3  # Red channel
+    xray[:, :, 1] = img_gray ** 1.2 * 0.6  # Green channel  
+    xray[:, :, 2] = img_gray ** 1.0 * 1.0  # Blue channel - dominant for X-ray
+    
+    # Visible: Starlight (yellow/white) - optical emission
+    visible = np.zeros((img_gray.shape[0], img_gray.shape[1], 3))
+    visible[:, :, 0] = img_gray ** 0.8 * 0.9  # Red
+    visible[:, :, 1] = img_gray ** 0.8 * 0.9  # Green
+    visible[:, :, 2] = img_gray ** 0.9 * 0.7  # Blue
+    
+    # Infrared: Dust emission (red/orange) - thermal emission from dust
+    infrared = np.zeros((img_gray.shape[0], img_gray.shape[1], 3))
+    infrared[:, :, 0] = img_gray ** 0.5 * 1.0  # Red - dominant
+    infrared[:, :, 1] = img_gray ** 0.6 * 0.5  # Green
+    infrared[:, :, 2] = img_gray ** 0.7 * 0.2  # Blue
+    
+    # Normalize
+    xray = np.clip(xray, 0, 1)
+    visible = np.clip(visible, 0, 1)
+    infrared = np.clip(infrared, 0, 1)
+    
+    return xray, visible, infrared
+
+# Create a scientific RGB composite (X-ray: Blue, Visible: Green, IR: Red)
+def create_scientific_rgb_composite(img):
+    """Create scientific RGB composite matching astronomical conventions"""
+    if len(img.shape) == 3:
+        img_float = img.astype(np.float32) / 255.0
+        img_gray = np.mean(img_float, axis=2)
+    else:
+        img_gray = img.astype(np.float32) / 255.0
+    
+    # Astronomical color mapping:
+    # Red = Infrared (longest wavelength)
+    # Green = Visible (optical)
+    # Blue = X-ray (shortest wavelength)
+    
+    rgb_composite = np.zeros((img_gray.shape[0], img_gray.shape[1], 3))
+    
+    # Red channel (Infrared)
+    rgb_composite[:, :, 0] = img_gray ** 0.5  # IR: brighter, smoother
+    
+    # Green channel (Visible)
+    rgb_composite[:, :, 1] = img_gray ** 0.8  # Visible: natural contrast
+    
+    # Blue channel (X-ray)
+    rgb_composite[:, :, 2] = img_gray ** 1.2  # X-ray: sharper contrast
+    
+    # Apply brightness scaling
+    rgb_composite = np.clip(rgb_composite, 0, 1)
+    
+    # Enhance colors based on intensity
+    mask = img_gray > 0.5
+    rgb_composite[mask] = rgb_composite[mask] * 1.2
+    rgb_composite = np.clip(rgb_composite, 0, 1)
+    
+    return rgb_composite
+

@@ -33,6 +33,22 @@ st.markdown("""
     .download-button {
         margin-top: 10px;
         margin-bottom: 10px;
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: #ff4b4b;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        text-align: center;
+    }
+    .download-button:hover {
+        background-color: #ff6b6b;
+        color: white;
+    }
+    .stMetric {
+        background-color: #f0f2f6;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -73,6 +89,23 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("**Tony Ford | tlcagford@gmail.com | Patent Pending | 2026**")
 
+# Main content
+st.markdown("## 🔭 QCAUS v1.0 — Quantum Cosmology & Astrophysics Unified Suite")
+
+# File upload section - MUST BE BEFORE THE MAIN PROCESSING
+col1, col2 = st.columns([2, 1])
+with col1:
+    st.markdown("### Preset Real Data — click to run instantly")
+    preset_data = st.button("Run with SGR 1806-20", use_container_width=True)
+    
+with col2:
+    st.markdown("### — OR —")
+    uploaded_file = st.file_uploader(
+        "Drag and drop file here",
+        type=['fits', 'fit', 'fz', 'jpg', 'jpeg', 'png'],
+        help="Limit 200MB per file"
+    )
+
 # Helper function to create download button
 def get_image_download_link(img_array, filename, caption):
     """Generate a download link for an image"""
@@ -85,7 +118,7 @@ def get_image_download_link(img_array, filename, caption):
     byte_im = buf.getvalue()
     
     b64 = base64.b64encode(byte_im).decode()
-    href = f'<a href="data:image/png;base64,{b64}" download="{filename}" class="download-button">{caption}</a>'
+    href = f'<a href="data:image/png;base64,{b64}" download="{filename}" style="display:inline-block;padding:8px 16px;background-color:#ff4b4b;color:white;text-decoration:none;border-radius:5px;margin-top:10px;">{caption}</a>'
     return href
 
 # Helper function to normalize images
@@ -234,8 +267,6 @@ def dark_photon_conversion(img, kinetic_mixing, magnetar_eps):
     img_float = img.astype(np.float32) / 255.0
     
     # Conversion probability from dark photon to photon
-    # P_conv = exp(-2 * (1 - exp(-ε^2 / (2 * μ^2))))
-    # where μ = m_γ'/m_pl
     conversion_prob = np.exp(-2 * (1 - np.exp(-magnetar_eps**2 / (2 * max(kinetic_mixing, 1e-12)**2))))
     
     result = img_float * conversion_prob
@@ -386,7 +417,8 @@ def create_em_composite(img, f_nl, n_q):
     
     return normalize_image(rgb)
 
-# Main processing
+# ==================== MAIN PROCESSING ====================
+# This is where we check for uploaded file or preset button
 if uploaded_file is not None or preset_data:
     # Load image
     if uploaded_file is not None:
@@ -483,7 +515,7 @@ if uploaded_file is not None or preset_data:
         fig.savefig(buf, format='png', dpi=150, bbox_inches='tight')
         buf.seek(0)
         b64 = base64.b64encode(buf.read()).decode()
-        st.markdown(f'<a href="data:image/png;base64,{b64}" download="magnetar_qed_plot.png">📥 Download Magnetar QED Plot</a>', 
+        st.markdown(f'<a href="data:image/png;base64,{b64}" download="magnetar_qed_plot.png" style="display:inline-block;padding:8px 16px;background-color:#ff4b4b;color:white;text-decoration:none;border-radius:5px;margin-top:10px;">📥 Download Magnetar QED Plot</a>', 
                    unsafe_allow_html=True)
         plt.close(fig)
     except Exception as e:

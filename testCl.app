@@ -12,7 +12,7 @@ Tony E. Ford | tlcagford@gmail.com | Patent Pending | 2026
 ║  [2] StealthPDPRadar/pdp_radar_core.py  ← STEALTH DARK LEAKAGE ONLY        ║
 ║      spectral_duality_filter (oscillation_length = 100/(m·1e9))             ║
 ║      entanglement_residuals  (S = −ρ log ρ + interference cross-term)       ║
-║      dark_photon_detection_prob (Bayesian: prior·lhood/(prior·lhood+(1−prior))) ║
+║      stealth_probability     (Bayesian: prior·lhood/(prior·lhood+(1−prior))) ║
 ║      blue_halo_fusion        (R=original, G=residuals, B=dark; γ=0.45)      ║
 ║  [3] Primordial-Photon-DarkPhoton-Entanglement / physics.py + README         ║
 ║      i∂ρ/∂t = [H_eff, ρ]  |  S = −Tr(ρ log ρ)                             ║
@@ -318,35 +318,15 @@ def _pil_font(size: int):
         return ImageFont.load_default()
 
 
-def _apply_cmap(arr2d: np.ndarray, cmap_name: str) -> np.ndarray:
-    """Apply a matplotlib colormap to a 2-D [0,1] array → uint8 RGB (H,W,3)."""
-    import matplotlib.cm as mcm
-    cmap = mcm.get_cmap(cmap_name)
-    rgba = cmap(np.clip(arr2d, 0, 1))          # (H,W,4) float [0,1]
-    return (rgba[..., :3] * 255).astype(np.uint8)
-
-
 def qcaus_full_infographic(img_input, title: str, metrics: dict,
                             scale_kpc_per_pixel: float = None,
-                            legend_items=None,
-                            cmap: str = None) -> Image.Image:
-    """
-    Annotated infographic with banner, metrics panel, scale bar, legend [1].
-    cmap: matplotlib colormap name (e.g. 'hot', 'plasma', 'inferno', 'YlOrRd').
-    If provided, applies the colormap to 2-D grayscale input before rendering.
-    """
+                            legend_items=None) -> Image.Image:
+    """Annotated infographic with banner, metrics panel, scale bar, legend [1]."""
     if isinstance(img_input, np.ndarray):
         if img_input.ndim == 2:
-            if cmap:
-                # Apply colormap — fixes black image bug for soliton/magnetar panels
-                rgb = _apply_cmap(img_input, cmap)
-                img = Image.fromarray(rgb, mode="RGB")
-            else:
-                arr = np.stack([np.clip(img_input, 0, 1)] * 3, axis=-1)
-                img = Image.fromarray((arr * 255).astype(np.uint8))
-        else:
-            arr = np.clip(img_input, 0, 1)
-            img = Image.fromarray((arr * 255).astype(np.uint8))
+            img_input = np.stack([img_input] * 3, axis=-1)
+        arr = np.clip(img_input, 0, 1)
+        img = Image.fromarray((arr * 255).astype(np.uint8))
     else:
         img = img_input.convert("RGB").copy()
 
@@ -522,10 +502,9 @@ def entanglement_residuals(image, ordinary, dark,
     return convolve(res, kernel / kernel.sum(), mode="constant")
 
 
-# [2] DARK PHOTON DETECTION PROBABILITY — Bayesian dark-mode leakage detection
-# Scientific term: P_dark (dark photon detection probability via kinetic mixing)
-def dark_photon_detection_prob(dark_mode, residuals,
-                               entanglement_strength: float = 0.3) -> np.ndarray:
+# [2] STEALTH PROBABILITY — Bayesian dark-mode detection
+def stealth_probability(dark_mode, residuals,
+                        entanglement_strength: float = 0.3) -> np.ndarray:
     dark_ev = dark_mode / (dark_mode.mean() + 0.1)
     lm      = uniform_filter(residuals, size=5)
     res_ev  = lm / (lm.mean() + 0.1)
@@ -733,7 +712,7 @@ input[type=range]{{flex:1;accent-color:#7c65f6;height:3px;cursor:pointer;}}
 # =============================================================================
 with st.sidebar:
     st.title("🔭 QCAUS v21.0")
-    st.markdown("*FDM · PDP · Magnetar · QCIS · WFC3 PSF · JWST · Dark Photon Detection*")
+    st.markdown("*FDM · PDP · Magnetar · QCIS · WFC3 PSF · JWST · Stealth*")
     st.markdown("---")
     st.markdown("### ⚛️ Core Physics")
     omega   = st.slider("Omega_PD Entanglement",  0.05, 0.50, 0.20, 0.01,
@@ -834,12 +813,12 @@ if uploaded is not None or st.session_state.get("run"):
                                              pdp_out * 0.3 + dark_sig * 0.7],
                                             axis=-1), 0, 1)
 
-    # Dark photon detection pipeline [2] — kinetic-mixing dark leakage only
+    # Stealth pipeline [2] — dark leakage only
     ord_mode, dark_mode = spectral_duality_filter(
         img_proc, omega, fringe / 30, epsilon * 1e9, 1e-9)
     ent_res  = entanglement_residuals(
         img_proc, ord_mode, dark_mode, omega * 0.3, epsilon * 1e9, fringe / 30)
-    dp_detect = dark_photon_detection_prob(dark_mode, ent_res, omega * 0.3)
+    stealth  = stealth_probability(dark_mode, ent_res, omega * 0.3)
     fusion   = blue_halo_fusion(img_proc, dark_mode, ent_res)
 
     # Magnetar [4]
@@ -854,14 +833,14 @@ if uploaded is not None or st.session_state.get("run"):
     # FDM radial profile
     r_arr, rho_arr = fdm_soliton_profile(m_fdm)
 
-    sp_peak = float(dp_detect.max() * 100)
+    sp_peak = float(stealth.max() * 100)
 
     metrics = {
         "FDM Peak rho/rho0": f"{float(soliton.max()):.3f}",
         "PDP Mixing Omega":   f"{omega:.3f}",
         "Entropy Min":        f"{float(ent_res.min()):.3f}",
         "Dark Photon Conf":   f"{dark_conf:.1f}%",
-        "P_dark Peak":        f"{sp_peak:.1f}%",
+        "Stealth P_peak":     f"{sp_peak:.1f}%",
         "Scale":              f"{scale_kpc:.2f} kpc/px",
     }
 
@@ -883,45 +862,36 @@ if uploaded is not None or st.session_state.get("run"):
     with c1:
         st.image(qcaus_full_infographic(soliton, "FDM SOLITON MAP", metrics,
                                          scale_kpc,
-                                         [((0,255,0), "FDM Density")],
-                                         cmap="hot"),
-                 caption="FDM Soliton  rho(r)=rho0[sin(kr)/kr]^2", use_container_width=True)
+                                         [((0,255,0), "FDM Density")]),
+                 caption="FDM Soliton", use_container_width=True)
     with c2:
         st.image(qcaus_full_infographic(ent_res, "PDP ENTANGLEMENT RESIDUALS",
                                          metrics,
-                                         legend_items=[((0,130,255), "PDP Halo")],
-                                         cmap="inferno"),
-                 caption="Entanglement Residuals  S=-rho*log(rho)", use_container_width=True)
+                                         legend_items=[((0,130,255), "PDP Halo")]),
+                 caption="Entanglement Residuals S=-rho*log(rho)", use_container_width=True)
     with c3:
-        st.image(qcaus_full_infographic(dp_detect, "DARK PHOTON DETECTION PROBABILITY",
+        st.image(qcaus_full_infographic(stealth, "STEALTH DARK LEAKAGE",
                                          metrics,
-                                         legend_items=[((255,100,0), "P_dark")],
-                                         cmap="YlOrRd"),
-                 caption="P_dark: Bayesian kinetic-mixing detection [StealthPDPRadar]", use_container_width=True)
+                                         legend_items=[((255,100,0), "Dark Mode")]),
+                 caption="Stealth Probability [Bayesian]", use_container_width=True)
 
     # ── Blue Halo + Magnetar ──────────────────────────────────────────────────
     st.markdown("---")
     st.markdown("### Blue-Halo Fusion & Magnetar QED")
     cA, cB, cC = st.columns(3)
     with cA:
-        st.image(qcaus_full_infographic(fusion, "BLUE-HALO FUSION  gamma=0.45", metrics),
-                 caption="Blue-Halo Fusion (R=original G=residuals B=dark) [pdp_radar_core.py]",
-                 use_container_width=True)
+        st.image(qcaus_full_infographic(fusion, "BLUE HALO FUSION gamma=0.45", metrics),
+                 caption="Blue-Halo Fusion [StealthPDPRadar]", use_container_width=True)
     with cB:
-        st.image(qcaus_full_infographic(B_n, f"MAGNETAR DIPOLE B-FIELD  B0=10^{B0_exp:.1f}G",
+        st.image(qcaus_full_infographic(B_n,    f"MAGNETAR B-FIELD B0=10^{B0_exp:.1f}G",
                                          metrics,
-                                         legend_items=[((255,60,60), "B-Field")],
-                                         cmap="plasma"),
-                 caption="B=B0(R/r)^3 sqrt(3cos^2theta+1)  Bcrit=4.414e13 G",
-                 use_container_width=True)
+                                         legend_items=[((255,60,60), "B-Field")]),
+                 caption="Dipole B-Field", use_container_width=True)
     with cC:
-        st.image(qcaus_full_infographic(conv_n,
-                                         "DARK PHOTON CONVERSION  P=eps^2(1-e^{-B^2/m^2})",
+        st.image(qcaus_full_infographic(conv_n, "DARK PHOTON CONVERSION P=eps^2(1-e^{-B/m})",
                                          metrics,
-                                         legend_items=[((180,0,255), "P_conv")],
-                                         cmap="hot"),
-                 caption="Kinetic-mixing dark photon conversion [Magnetar-Quantum-Vacuum]",
-                 use_container_width=True)
+                                         legend_items=[((180,0,255), "P_conv")]),
+                 caption="Dark Photon Conversion", use_container_width=True)
 
     # ── WFC3 PSF Section ──────────────────────────────────────────────────────
     st.markdown("---")
@@ -993,17 +963,17 @@ if uploaded is not None or st.session_state.get("run"):
               delta=f"fringe={fringe}")
     m4.metric("Mixing Omega*0.6",   f"{omega*0.6:.3f}",
               delta=f"Omega={omega:.2f}")
-    m5.metric("P_dark Peak",        f"{sp_peak:.1f}%",
-              delta=f"Bayesian kinetic-mixing")
+    m5.metric("Stealth P_peak",     f"{sp_peak:.1f}%",
+              delta=f"Bayesian")
     m6.metric("WFC3 FWHM",         f"{wfc3_psf_fwhm(focus_um):.3f} px",
               delta=f"focus={focus_um} um")
 
     if sp_peak > 50:
-        st.error(f"STRONG DARK PHOTON DETECTION SIGNAL — P_dark = {sp_peak:.0f}%  [pdp_radar_core.py]")
+        st.error(f"STRONG DARK-MODE LEAKAGE — {sp_peak:.0f}%  [StealthPDPRadar]")
     elif sp_peak > 20:
-        st.warning(f"DARK PHOTON SIGNAL DETECTED — P_dark = {sp_peak:.0f}%  [pdp_radar_core.py]")
+        st.warning(f"DARK-MODE SIGNAL — {sp_peak:.0f}%  [StealthPDPRadar]")
     else:
-        st.success(f"CLEAR — Dark photon detection probability {sp_peak:.0f}%  (below threshold)")
+        st.success(f"CLEAR — stealth probability {sp_peak:.0f}%")
 
     # ── ZIP Download ──────────────────────────────────────────────────────────
     st.markdown("---")
@@ -1030,7 +1000,7 @@ if uploaded is not None or st.session_state.get("run"):
         zf.writestr("05_PDP_Entangled.png",     _img_bytes(pdp_out,   "inferno"))
         zf.writestr("06_RGB_Composite.png",     _img_bytes(rgb_out))
         zf.writestr("07_Entanglement_Residuals.png", _img_bytes(ent_res, "inferno"))
-        zf.writestr("08_Dark_Photon_Detection.png",  _img_bytes(dp_detect, "YlOrRd"))
+        zf.writestr("08_Stealth_Probability.png",    _img_bytes(stealth, "YlOrRd"))
         zf.writestr("09_Blue_Halo_Fusion.png",       _img_bytes(fusion))
         zf.writestr("10_Magnetar_Bfield.png",        _img_bytes(B_n,    "plasma"))
         zf.writestr("11_Magnetar_QED.png",           _img_bytes(qed_n,  "inferno"))
@@ -1064,7 +1034,7 @@ Dark Photon Signal:       {dark_conf:.1f}%
 Soliton Peak rho/rho0:    {float(soliton.max()):.4f}
 Fringe Contrast:          {float(interf.std()):.4f}
 Mixing Angle Omega*0.6:   {omega*0.6:.4f}
-Dark Photon P_dark:       {sp_peak:.1f}%
+Stealth P_peak:           {sp_peak:.1f}%
 Max Von Neumann S:        {float(entropy.max()):.4f}
 
 == Formula Sources (all verified against GitHub repos) ==
@@ -1072,7 +1042,7 @@ Max Von Neumann S:        {float(entropy.max()):.4f}
 [2] L_mix=(eps/2)F_munu F'^munu            StealthPDPRadar/pdp_radar_core.py
     oscillation_length=100/(m*1e9)
     S=-rho*log(rho) + cross-term
-    P_dark = Bayesian prior*lhood/(prior*lhood+(1-prior)) — dark photon detection probability
+    P_stealth = Bayesian prior*lhood/(prior*lhood+(1-prior))
     Blue-halo: R=orig G=residuals B=dark gamma=0.45
 [3] i d/dt rho=[H_eff,rho]                Primordial-Photon-DarkPhoton repo
     S=-Tr(rho log rho)

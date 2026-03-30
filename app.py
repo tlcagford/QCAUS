@@ -118,11 +118,14 @@ def blue_halo_fusion(img, dark_mode, entanglement):
 
 def main():
     """Main Streamlit application."""
-    st.set_page_config(
-        page_title="Quantum Causality Analysis",
-        page_icon="🔬",
-        layout="wide"
-    )
+    try:
+        st.set_page_config(
+            page_title="Quantum Causality Analysis",
+            page_icon="🔬",
+            layout="wide"
+        )
+    except:
+        pass  # If already configured
     
     st.title("🔬 Quantum Causality Analysis - PDP Entanglement")
     st.markdown("---")
@@ -154,31 +157,37 @@ def main():
         st.markdown("---")
         st.header("⚛️ Quantum Parameters")
         
+        # Magnetar B-field slider
         omega_pd = st.slider(
             "Magnetar B-field (ω)",
             min_value=0.0,
             max_value=2.0,
             value=1.0,
             step=0.01,
+            format="%.3f",
             help="Controls the magnetar magnetic field strength"
         )
         
+        # Kinetic mixing slider - fixed with proper parameters
         kin_mix_log = st.slider(
             "Kinetic Mixing (log₁₀)",
-            min_value=-14,
-            max_value=-8,
-            value=-12,
+            min_value=-14.0,
+            max_value=-8.0,
+            value=-12.0,
             step=0.5,
+            format="%.1f",
             help="Kinetic mixing parameter for dark photon coupling"
         )
         kin_mix = 10 ** kin_mix_log
         
+        # FDM mass slider
         fdm_mass_log = st.slider(
             "FDM Mass (log₁₀ eV)",
-            min_value=-23,
-            max_value=-21,
-            value=-22,
+            min_value=-23.0,
+            max_value=-21.0,
+            value=-22.0,
             step=0.1,
+            format="%.1f",
             help="Fuzzy Dark Matter mass scale"
         )
         fdm_mass = 10 ** fdm_mass_log
@@ -186,8 +195,8 @@ def main():
         st.markdown("---")
         st.header("🎨 Display Options")
         
-        ord_mode = st.toggle("Order Mode", help="Toggle order parameter visualization")
-        dark_mode = st.toggle("Dark Mode", help="Enable dark mode visualization")
+        ord_mode = st.checkbox("Order Mode", value=False, help="Toggle order parameter visualization")
+        dark_mode = st.checkbox("Dark Mode", value=False, help="Enable dark mode visualization")
         
         # Update session state
         st.session_state.omega_pd = omega_pd
@@ -203,18 +212,22 @@ def main():
         st.subheader("📷 Original Image")
         
         if uploaded_file is not None:
-            # Load and process image
-            image = Image.open(uploaded_file)
-            
-            # Convert to grayscale
-            img_gray = np.array(image.convert('L')) / 255.0
-            st.session_state.img_gray = img_gray
-            
-            # Display original
-            st.image(img_gray, use_container_width=True, clamp=True)
-            
-            # Image info
-            st.caption(f"Dimensions: {img_gray.shape[1]} x {img_gray.shape[0]}")
+            try:
+                # Load and process image
+                image = Image.open(uploaded_file)
+                
+                # Convert to grayscale
+                img_gray = np.array(image.convert('L')) / 255.0
+                st.session_state.img_gray = img_gray
+                
+                # Display original
+                st.image(img_gray, use_container_width=True, clamp=True)
+                
+                # Image info
+                st.caption(f"Dimensions: {img_gray.shape[1]} x {img_gray.shape[0]}")
+            except Exception as e:
+                st.error(f"Error loading image: {str(e)}")
+                st.session_state.img_gray = None
         else:
             # Placeholder when no image uploaded
             st.info("👈 Please upload an image to begin analysis")
@@ -275,12 +288,18 @@ def main():
                     with col_metrics3:
                         st.metric("FDM Mass", f"{st.session_state.fdm_mass:.2e} eV")
                     
-                    # Calculate fringe visibility
-                    center_y = fusion.shape[0] // 2
-                    center_line = fusion[center_y, :, 0] if len(fusion.shape) == 3 else fusion[center_y, :]
-                    visibility = (np.max(center_line) - np.min(center_line)) / (np.max(center_line) + np.min(center_line) + 1e-10)
-                    st.metric("Fringe Visibility", f"{visibility:.3f}")
-                    
+                    # Calculate fringe visibility if possible
+                    try:
+                        if len(fusion.shape) == 3:
+                            center_line = fusion[fusion.shape[0] // 2, :, 0]
+                        else:
+                            center_line = fusion[fusion.shape[0] // 2, :]
+                        
+                        visibility = (np.max(center_line) - np.min(center_line)) / (np.max(center_line) + np.min(center_line) + 1e-10)
+                        st.metric("Fringe Visibility", f"{visibility:.3f}")
+                    except:
+                        st.info("Fringe visibility calculation not available")
+                        
             except Exception as e:
                 st.error(f"Error processing image: {str(e)}")
                 st.info("Try uploading a different image or adjusting parameters")
@@ -289,7 +308,7 @@ def main():
     
     # Footer
     st.markdown("---")
-    st.caption(f"Quantum Causality Analysis Tool | Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    st.caption(f"Quantum Causality Analysis Tool | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 if __name__ == "__main__":
     main()

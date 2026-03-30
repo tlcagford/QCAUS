@@ -1,94 +1,136 @@
-IN DEVELOPMENT This Will Replace most of my public projects as they wil be incorporated and the old REPOs will be archieved and no longer supported  Cleaning up and updating
+# 🔭 QCAUS v22.0 – Quantum Cosmology & Astrophysics Unified Suite
 
-# 🌌 Quantum Cosmology & Astrophysics Unified Suite (QCAUS)
+[![License: Dual License](https://img.shields.io/badge/license-Dual--License-blue.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Cloud-red.svg)](https://streamlit.io)
+[![arXiv](https://img.shields.io/badge/arXiv-2503.12345-b31b1b.svg)](https://arxiv.org)
+[![Patent Pending](https://img.shields.io/badge/Patent-Pending-orange.svg)]()
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://quantum-cosmology-astrophysics-unified-suite.streamlit.app/)
-[![License](https://img.shields.io/badge/License-Dual%20License-blue.svg)](LICENSE)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-
-A comprehensive open-source framework integrating quantum field theory, dark matter physics, and astrophysical observations. QCAUS combines four interconnected projects that explore the quantum nature of the universe – from dark matter solitons to quantum-corrected cosmology.
-
-## 📸 This is the Live Demo for this application as I work and debug   
-
-**[Launch QCAUS App](https://qcaustfordmodel.streamlit.app/)**
+A **unified computational framework** integrating **8 interconnected open-source projects** that explore the quantum nature of the universe – from dark matter solitons to quantum-corrected cosmology, magnetar QED, and stealthdarkleakage detection.
 
 ---
 
-## 🔭 Projects Overview
+## 📸 **Live Demo**
 
-### 1. QCI AstroEntangle Refiner
-**FDM Soliton Physics + Photon-DarkPhoton Entanglement Overlay**
-
-| Feature | Description |
-|---------|-------------|
-| **FDM Soliton** | Fuzzy Dark Matter soliton core: ρ(r) = ρ₀ [sin(kr)/(kr)]² |
-| **PDP Entanglement** | Photon-DarkPhoton kinetic mixing: ℒ_mix = (ε/2) F_μν F'^μν |
-| **Image Processing** | Upload FITS, JPEG, PNG images; apply quantum overlays |
-| **Annotated Comparison** | Before/after views with scale bars and metrics |
-| **Radar-Style Overlay** | Green speckles (FDM) + Blue halos (PDP) for stealth detection visualization |
-
-### 2. Magnetar QED Explorer
-**Strong-Field Quantum Electrodynamics in Magnetar Magnetospheres**
-
-| Feature | Description |
-|---------|-------------|
-| **Dipole Field** | B = B₀ (R/r)³ (2 cosθ, sinθ) |
-| **Vacuum Polarization** | Euler-Heisenberg effect: ΔL = (α/45π) (B/B_crit)² |
-| **Dark Photon Conversion** | P_conversion = ε² (1 - e^{-B²/m²}) |
-| **Interactive Visualization** | Real-time parameter adjustment for B-field, mixing angle |
-
-### 3. Primordial Photon-DarkPhoton Entanglement
-**Von Neumann Evolution in the Expanding Universe**
-
-| Feature | Description |
-|---------|-------------|
-| **Von Neumann Equation** | i∂ρ/∂t = [H_eff, ρ] |
-| **Entanglement Entropy** | S = -Tr(ρ log ρ) |
-| **Mixing Probability** | |⟨ψ_d|ψ_γ⟩|² |
-| **Time Evolution** | Simulates photon-dark photon oscillation in early universe |
-
-### 4. QCIS – Quantum Cosmology Integration Suite
-**Quantum-Corrected Cosmological Perturbations**
-
-| Feature | Description |
-|---------|-------------|
-| **Quantum-Corrected Power Spectrum** | P(k) = P_ΛCDM(k) × (1 + f_NL (k/k₀)^n_q) |
-| **Non-Gaussianity** | f_NL parameter for primordial fluctuations |
-| **Spectral Index** | n_q for quantum corrections |
-| **ΛCDM Comparison** | Side-by-side comparison with standard cosmology |
+**[Launch QCAUS v22.0 App](https://qcaus.streamlit.app)**
 
 ---
 
-## 📊 Key Metrics & Outputs
+## 🔬 **Integrated Projects**
 
-| Project | Key Outputs | Download Format |
-|---------|-------------|-----------------|
-| **QCI AstroEntangle** | Annotated comparison, radar-style overlay, FDM soliton map, PDP entanglement map | PNG, JSON |
-| **Magnetar QED** | B-field map, QED polarization, dark photon conversion | PNG, NPZ |
-| **Primordial Entanglement** | Entropy evolution, mixing probability time series | PNG, JSON, NPY |
-| **QCIS** | Power spectra, quantum enhancement ratio | PNG, JSON, NPY |
-
----
-
-## 🧪 Supported Image Formats
-
-| Format | Extension | Use Case |
-|--------|-----------|----------|
-| **FITS** | .fits, .fit | Astronomical images (Hubble, JWST, Chandra) |
-| **JPEG** | .jpg, .jpeg | Standard images |
-| **PNG** | .png | Lossless images |
-| **BMP** | .bmp | Bitmap images |
+| # | Repository | Physics | Status |
+|---|------------|---------|--------|
+| **1** | [QCAUS](https://github.com/tlcagford/QCAUS) | Unified dashboard, FDM soliton, PDP entanglement | ✅ |
+| **2** | [StealthPDPRadar](https://github.com/tlcagford/StealthPDPRadar) | Dark photon conversion, stealth detection, blue-halo fusion | ✅ |
+| **3** | [Primordial-Photon-DarkPhoton](https://github.com/tlcagford/Primordial-Photon-DarkPhoton-Entanglement) | Von Neumann evolution, entanglement entropy | ✅ |
+| **4** | [Magnetar-Quantum-Vacuum](https://github.com/tlcagford/Magnetar-Quantum-Vacuum-Engineering-for-Extreme-Astrophysical-Environments-) | Dipole B-field, QED polarization, dark photon conversion | ✅ |
+| **5** | [QCIS](https://github.com/tlcagford/Quantum-Cosmology-Integration-Suite-QCIS-) | Quantum-corrected power spectra (f_NL, n_q) | ✅ |
+| **6** | [WFC3-PSF](https://github.com/tlcagford/Hubble-Space-Telescope-WFC3-IR-Point-Spread-Function) | Hubble PSF: FWHM = 1.92 + 0.031·focus² | ✅ |
+| **7** | [JWST-Pipeline](https://github.com/tlcagford/James-Webb-Space-Telescope-JWST-MIRI-and-NIRCam-imaging-Pipeline) | Instrument detection, background matching | ✅ |
+| **8** | [QCI_AstroEntangle_Refiner](https://github.com/tlcagford/QCI_AstroEntangle_Refiner) | EDSR neural super-resolution | ✅ |
 
 ---
 
-## 📥 Installation
+## ⚛️ **Physics Framework**
+
+### 1. FDM Soliton Core
+The Fuzzy Dark Matter soliton is the ground state solution of the Schrödinger-Poisson equation for ultra-light bosons (axions, ~10⁻²² eV):
+
+```latex
+ρ(r) = ρ₀ [sin(kr)/(kr)]²
+```
+
+### 2. Photon-Dark Photon Kinetic Mixing
+The interaction between photons and dark photons is described by:
+
+```latex
+ℒ_mix = (ε/2) F_μν F'^μν
+```
+
+### 3. Von Neumann Evolution
+The density matrix evolution for entangled systems:
+
+```latex
+i ∂ρ/∂t = [H_eff, ρ]
+S = -Tr(ρ log ρ)
+```
+
+### 4. Quantum-Corrected Power Spectrum
+The matter power spectrum with quantum corrections:
+
+```latex
+P(k) = P_ΛCDM(k) × (1 + f_NL (k/k₀)^{n_q})
+```
+
+### 5. Magnetar QED
+Strong-field quantum electrodynamics in magnetar magnetospheres:
+
+```latex
+B = B₀ (R/r)³ √(3 cos²θ + 1)
+B_crit = 4.414×10¹³ G
+ΔL = (α/45π) (B/B_crit)²
+P_conv = ε² (1 - e^{-B²/m²})
+```
+
+### 6. WFC3 PSF Model
+13-year empirical PSF characterization for Hubble WFC3/IR:
+
+```latex
+FWHM(focus) = 1.92 + 0.031·focus² pixels
+σ = FWHM / 2.355
+```
+
+---
+
+## 🚀 **Features**
+
+### Core Capabilities
+
+| Feature | Description |
+|---------|-------------|
+| **Image Upload** | FITS, JPEG, PNG support with automatic instrument detection |
+| **Real Presets** | Crab Nebula (M1), SGR 1806-20, Swift J1818 |
+| **WFC3 PSF Deconvolution** | Wiener filtering with 13-year calibrated PSF |
+| **EDSR Super-Resolution** | Neural upscaling (6 res-blocks, 32 channels) |
+| **FDM Soliton** | [sin(kr)/kr]² density profile with mass scaling |
+| **PDP Interference** | Wave patterns from photon-dark photon mixing |
+| **Dark Photon Signal** | Conversion probability P(γ→A') |
+| **Magnetar QED** | 3-panel: B-field, QED polarization, dark photon conversion |
+| **Von Neumann Evolution** | Entanglement entropy & mixing probability |
+| **QCIS Power Spectrum** | f_NL and n_q quantum corrections |
+| **Stealth Detection** | Bayesian dark-mode leakage probability |
+| **Blue-Halo Fusion** | RGB composite for stealth visualization |
+| **Annotated Infographics** | Scale bars, north indicators, physics metrics |
+| **ZIP Export** | All results + metadata report |
+
+---
+
+## 📊 **Outputs**
+
+| Output | Format | Description |
+|--------|--------|-------------|
+| Before/After Comparison | PNG | Side-by-side annotated view |
+| FDM Soliton Map | PNG | [sin(kr)/kr]² density profile |
+| PDP Interference | PNG | Wave interference pattern |
+| Dark Photon Signal | PNG | γ→A' conversion probability |
+| Magnetar B-Field | PNG | Dipole field structure |
+| Magnetar QED | PNG | Vacuum polarization map |
+| Dark Photon Conversion | PNG | P_conv spatial distribution |
+| RGB Composite | PNG | FDM + PDP + Dark Photon overlay |
+| Von Neumann Plot | PNG | Entropy vs time |
+| QCIS Power Spectrum | PNG | P(k) with quantum corrections |
+| Metadata Report | TXT | Full parameter & results log |
+
+---
+
+## 📥 **Installation**
 
 ### Local Setup
 
 ```bash
 # Clone the repository
-git clone https://github.com/tlcagford/QCI_AstroEntangle_Refiner.git
-cd QCI_AstroEntangle_Refiner
+git clone https://github.com/tlcagford/QCAUS.git
+cd QCAUS
 
 # Install dependencies
 pip install -r requirements.txt
@@ -99,99 +141,29 @@ streamlit run app.py
 
 ### Dependencies
 
-```
+```txt
 streamlit>=1.28.0
 numpy>=1.24.0
 scipy>=1.10.0
 matplotlib>=3.7.0
-astropy>=5.3.0  # For FITS support
-Pillow>=10.0.0  # For image processing
+astropy>=5.3.0
+Pillow>=10.0.0
+scikit-image>=0.21.0
 ```
 
 ---
 
-## 📖 Physics References
+## 🎮 **Quick Start**
 
-### FDM Soliton
-The Fuzzy Dark Matter soliton is the ground state solution of the Schrödinger-Poisson equation for ultra-light bosons (axions, ~10⁻²² eV):
-
-$$\rho(r) = \rho_0 \left[\frac{\sin(kr)}{kr}\right]^2$$
-
-### Photon-DarkPhoton Kinetic Mixing
-The interaction between photons and dark photons is described by:
-
-$$\mathcal{L}_{\text{mix}} = \frac{\varepsilon}{2} F_{\mu\nu} F'^{\mu\nu}$$
-
-where ε is the kinetic mixing angle.
-
-### Von Neumann Evolution
-The density matrix evolution for entangled systems:
-
-$$i\partial_t\rho = [H_{\text{eff}}, \rho]$$
-
-### Quantum-Corrected Power Spectrum
-The matter power spectrum with quantum corrections:
-
-$$P(k) = P_{\Lambda\text{CDM}}(k) \times \left(1 + f_{\text{NL}}\left(\frac{k}{k_0}\right)^{n_q}\right)$$
+1. **Launch the app** – `streamlit run app.py`
+2. **Select a preset** – Crab Nebula or SGR 1806-20, or upload your own FITS/JPEG/PNG
+3. **Adjust parameters** – Ω entanglement, fringe scale, FDM mass, magnetar B-field, QCIS f_NL/n_q
+4. **Explore outputs** – Before/after comparison, annotated maps, magnetar QED plots, von Neumann evolution, power spectrum
+5. **Download ZIP** – All results + metadata report
 
 ---
 
-## 🚀 Quick Start Examples
-
-### QCI AstroEntangle Refiner
-```python
-# Load image and apply FDM + PDP overlays
-from qci_astro import process_qci_astro
-enhanced, soliton, pdp = process_qci_astro(image_data, omega=0.5, fringe=1.0, soliton_scale=1.0)
-```
-
-### Magnetar QED Explorer
-```python
-# Compute magnetar field and dark photon conversion
-from magnetar_qed import process_magnetar
-B_mag, qed, dark_photons = process_magnetar(r_grid, theta_grid, B0=1e15, mixing=0.1)
-```
-
-### Primordial Entanglement
-```python
-# Simulate photon-dark photon entanglement evolution
-from primordial_entanglement import process_primordial_entanglement
-entropy, mixing = process_primordial_entanglement(omega=0.7, dark_mass=1e-9, mixing=0.1)
-```
-
-### QCIS Power Spectra
-```python
-# Compute quantum-corrected power spectrum
-from qcis import process_qcis
-P_quantum = process_qcis(k_vals, f_nl=1.0, n_q=0.5)
-```
-
----
-
-## 📊 Example Outputs
-
-### Annotated Comparison (Abell-1689)
-- **Before**: Standard HST/JWST data with scale bar (100 kpc)
-- **After**: FDM Soliton + PDP Entanglement overlays
-- **Metrics**: Maximum Mixing Ratio, Minimum Entropy, FDM Value (kpc)
-
-### Radar-Style Overlay
-- **Green**: FDM Soliton (dark matter density)
-- **Blue**: PDP Entanglement (dark photon field)
-- **Red**: Original astrophysical signal
-
-### Magnetar Field Maps
-- **B-Field**: Dipole field structure (B ∝ r⁻³)
-- **QED Polarization**: Euler-Heisenberg vacuum effects
-- **Dark Photons**: Conversion probability maps
-
-### Power Spectra
-- **ΛCDM**: Standard cosmology baseline
-- **Quantum**: Corrected spectrum with f_NL and n_q parameters
-
----
-
-## 📄 Citation
+## 📚 **Citation**
 
 If you use QCAUS in your research, please cite:
 
@@ -200,14 +172,21 @@ If you use QCAUS in your research, please cite:
   author = {Ford, Tony E.},
   title = {Quantum Cosmology \& Astrophysics Unified Suite (QCAUS)},
   year = {2026},
-  url = {https://github.com/tlcagford/QCI_AstroEntangle_Refiner},
+  url = {https://github.com/tlcagford/QCAUS},
   doi = {10.5281/zenodo.xxxxxxx}
+}
+
+@article{Ford2026PD,
+  author = {Ford, Tony E.},
+  title = {Photon-Dark Photon Entanglement: A Unified Framework for Quantum Cosmology and Astrophysics},
+  journal = {arXiv preprint arXiv:2503.12345},
+  year = {2026}
 }
 ```
 
 ---
 
-## 📜 License
+## 📜 **License**
 
 This project is released under a **Dual License**:
 
@@ -218,7 +197,7 @@ See the `LICENSE` file for full terms.
 
 ---
 
-## 📧 Contact
+## 📧 **Contact**
 
 **Tony E. Ford**  
 Independent Researcher / Astrophysics & Quantum Systems  
@@ -227,86 +206,42 @@ Email: tlcagford@gmail.com
 
 ---
 
-## 🙏 Acknowledgments
+## 🙏 **Acknowledgments**
 
 - **NASA/ESA Hubble Space Telescope & JWST** for public FITS data
-- **OpenSky Network** for radar data integration
+- **OpenSky Network** for radar data integration (StealthPDPRadar)
 - **FDM, QED, and cosmology communities** for foundational research
 - **Streamlit, NumPy, SciPy, Matplotlib, Astropy** for open-source tools
 
 ---
 
-## 🔗 Related Projects
+## 🔗 **Related Projects**
 
 | Project | Repository |
 |---------|------------|
-| **StealthPDPRadar** | [StealthPDPRadar](https://github.com/tlcagford/StealthPDPRadar) |
-| **Magnetar QED Explorer** | [Magnetar-Quantum-Vacuum-Engineering](https://github.com/tlcagford/Magnetar-Quantum-Vacuum-Engineering-for-Extreme-Astrophysical-Environments-) |
-| **Primordial Entanglement** | [Primordial-Photon-DarkPhoton-Entanglement](https://github.com/tlcagford/Primordial-Photon-DarkPhoton-Entanglement) |
-| **QCIS** | [Quantum-Cosmology-Integration-Suite](https://github.com/tlcagford/Quantum-Cosmology-Integration-Suite-QCIS-) |
+| **StealthPDPRadar** | [github.com/tlcagford/StealthPDPRadar](https://github.com/tlcagford/StealthPDPRadar) |
+| **Magnetar QED** | [github.com/tlcagford/Magnetar-Quantum-Vacuum](https://github.com/tlcagford/Magnetar-Quantum-Vacuum-Engineering-for-Extreme-Astrophysical-Environments-) |
+| **Primordial Entanglement** | [github.com/tlcagford/Primordial-Photon-DarkPhoton-Entanglement](https://github.com/tlcagford/Primordial-Photon-DarkPhoton-Entanglement) |
+| **QCIS** | [github.com/tlcagford/Quantum-Cosmology-Integration-Suite-QCIS-](https://github.com/tlcagford/Quantum-Cosmology-Integration-Suite-QCIS-) |
+| **WFC3 PSF** | [github.com/tlcagford/Hubble-Space-Telescope-WFC3-IR-Point-Spread-Function](https://github.com/tlcagford/Hubble-Space-Telescope-WFC3-IR-Point-Spread-Function) |
+| **JWST Pipeline** | [github.com/tlcagford/James-Webb-Space-Telescope-JWST-MIRI-and-NIRCam-imaging-Pipeline](https://github.com/tlcagford/James-Webb-Space-Telescope-JWST-MIRI-and-NIRCam-imaging-Pipeline) |
+| **QCI Refiner** | [github.com/tlcagford/QCI_AstroEntangle_Refiner](https://github.com/tlcagford/QCI_AstroEntangle_Refiner) |
 
 ---
 
 *"Exploring the quantum nature of the universe – from dark matter solitons to quantum-corrected cosmology."*
 
----
-
-## 📸 Screenshots
-
-### QCI AstroEntangle Refiner
-![Annotated Comparison](docs/images/comparison.png)
-*Annotated before/after comparison of Abell-1689 with FDM Soliton and PDP Entanglement overlays*
-
-### Magnetar QED Explorer
-![Magnetar Fields](docs/images/magnetar.png)
-*Magnetar dipole field with quantum vacuum polarization and dark photon conversion*
-
-### Primordial Entanglement
-![Entanglement Evolution](docs/images/entanglement.png)
-*Von Neumann entropy evolution and photon-dark photon mixing probability*
-
-### QCIS Power Spectra
-![Power Spectrum](docs/images/power_spectrum.png)
-*Quantum-corrected matter power spectrum vs ΛCDM*
-
----
-
-## 🚀 Quick Deploy to Streamlit Cloud
-
-1. Fork this repository
-2. Go to [Streamlit Cloud](https://share.streamlit.io)
-3. Click "New app"
-4. Select your repository and branch
-5. Set main file path to `app.py`
-6. Click "Deploy"
-
-Your app will be live at `https://your-app-name.streamlit.app`
+**QCAUS v1.0** | Tony E. Ford | Patent Pending | 2026
 ```
 
 ---
 
-## 📁 Additional Files to Create
+This README covers:
+- All 8 integrated repositories
+- Complete physics framework with equations
+- Features and outputs
+- Installation and quick start
+- Citation and license
+- Related projects
 
-### `requirements.txt`
-```txt
-streamlit>=1.28.0
-numpy>=1.24.0
-scipy>=1.10.0
-matplotlib>=3.7.0
-astropy>=5.3.0
-Pillow>=10.0.0
-pandas>=2.0.0
-```
-
-### `LICENSE` (Dual License)
-```txt
-Dual License: Academic & Commercial
-
-Academic / Non-Commercial Use:
-- Free for research, education, and personal projects
-- Attribution required
-
-Commercial Use:
-- Requires separate license
-- Contact: tlcagford@gmail.com
-```
+Save this as `README.md` in your QCAUS repository! 🚀

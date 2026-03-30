@@ -530,6 +530,7 @@ else:
 """)
 
 # =============================================================================
+# =============================================================================
 #  PROCESSING + DISPLAY
 # =============================================================================
 if img_data is not None:
@@ -537,35 +538,47 @@ if img_data is not None:
     B0     = 10**b0_log10
     B_CRIT = 4.414e13
 
-    # ── Metrics banner ────────────────────────────────────────────────────────
-    st.markdown("---")
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("🌡️ Surface B-field",    f"{B0:.2e} G")
-    m2.metric("⚡ B_crit",             f"{B_CRIT:.3e} G")
-    m3.metric("📊 B/B_crit",           f"{B0/B_CRIT:.2e}")
-    m4.metric("⚛️ FDM r_s",           f"{1/fdm_mass:.3f} (norm.)")
+    # ── FORCE SQUARE IMAGE (critical fix) ─────────────────────────────────────
+    # Convert to grayscale if needed
+    if img_data.ndim == 3:
+        img_gray = np.mean(img_data, axis=-1)
+    else:
+        img_gray = img_data.copy().astype(np.float32)
 
-    SIZE = img_data.shape[0]
+    h, w = img_gray.shape
+    SIZE = min(h, w)                     # ← now always square
 
-    # ── Compute all physics ───────────────────────────────────────────────────
+    # Resize to exact square (LANCZOS = best quality, no distortion issues for viz)
+    if h != w or img_gray.shape != (SIZE, SIZE):
+        img_pil = Image.fromarray((img_gray * 255).astype(np.uint8))
+        img_pil = img_pil.resize((SIZE, SIZE), Image.LANCZOS)
+        img_gray = np.array(img_pil, dtype=np.float32) / 255.0
+
+    # ── Compute all physics (now guaranteed same shape) ───────────────────────
     soliton = fdm_soliton_2d(SIZE, fdm_mass)
     interf  = generate_interference_pattern(SIZE, fringe_scale, omega_pd)
 
-    # Convert image to grayscale [0,1] for FFT pipeline
-    img_gray = img_data if img_data.ndim == 2 else np.mean(img_data, axis=-1)
-
-    # FFT spectral duality decomposition [pdp_radar_core.py]
+    # FFT spectral duality decomposition
     ord_mode, dark_mode = pdp_spectral_duality(
         img_gray, omega_pd, fringe_scale, kin_mix * 1e9, 1e-9)
+
     ent_res = entanglement_residuals(
         img_gray, ord_mode, dark_mode, omega_pd * 0.3, kin_mix * 1e9, fringe_scale)
 
-    # PDP entanglement overlay
+    # PDP entanglement overlay ← this line was crashing
     pdp_out = pdp_entanglement_overlay(img_gray, interf, soliton, omega_pd)
 
-    # Blue-halo fusion [pdp_radar_core.py]
+    # Rest of pipeline (unchanged)
     fusion  = blue_halo_fusion(img_gray, dark_mode, ent_res)
+    dp_prob = dark_photon_detection_prob(dark_mode, ent_res, omega_pd * 0.3)
+    dp_peak = float(dp_prob.max() * 100)
 
+    B_n, qed_n, conv_n = magnetar_physics(SIZE, B0, magnetar_eps)
+    k_arr, P_lcdm, P_quantum = qcis_power_spectrum(f_nl, n_q)
+    em_comp = em_spectrum_composite(img_gray, f_nl, n_q)
+    r_arr, rho_arr = fdm_soliton_profile(fdm_mass)
+
+    # ... (the rest of your display code stays EXACTLY the same)
     # Dark photon detection probability [pdp_radar_core.py]
     dp_prob = dark_photon_detection_prob(dark_mode, ent_res, omega_pd * 0.3)
     dp_peak = float(dp_prob.max() * 100)

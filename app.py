@@ -1,5 +1,5 @@
 """
-QCAUS v22.0 – Quantum Cosmology & Astrophysics Unified Suite
+QCAUS v1.0 – Quantum Cosmology & Astrophysics Unified Suite
 Tony E. Ford | tlcagford@gmail.com | Patent Pending | 2026
 
 FULL PIPELINE VERIFICATION — all 8 repos integrated
@@ -19,7 +19,7 @@ from scipy.ndimage import gaussian_filter, convolve, uniform_filter
 warnings.filterwarnings("ignore")
 os.makedirs("output", exist_ok=True)
 
-st.set_page_config(layout="wide", page_title="QCAUS v22.0", page_icon="🔭")
+st.set_page_config(layout="wide", page_title="QCAUS v1.0", page_icon="🔭")
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] { background: #f5f7fb; }
@@ -259,7 +259,7 @@ def qcaus_full_infographic(img_input, title: str, metrics: dict,
 #  SIDEBAR
 # =============================================================================
 with st.sidebar:
-    st.title("🔭 QCAUS v22.0")
+    st.title("🔭 QCAUS v1.0")
     st.markdown("*FDM · PDP · Magnetar · QCIS · WFC3 PSF*")
     st.markdown("---")
     st.markdown("### ⚛️ Core Physics")
@@ -284,7 +284,7 @@ with st.sidebar:
 # =============================================================================
 #  MAIN
 # =============================================================================
-st.title("🔭 QCAUS v22.0 — Quantum Cosmology & Astrophysics Unified Suite")
+st.title("🔭 QCAUS v1.0 — Quantum Cosmology & Astrophysics Unified Suite")
 
 # Preset buttons
 st.markdown("**Preset Real Data** — click to run instantly")
@@ -497,7 +497,7 @@ if uploaded is not None or st.session_state.get("run"):
     st.download_button(
         label="📦 Download ALL Results (ZIP)",
         data=zip_buf,
-        file_name=f"qcaus_v22_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip",
+        file_name=f"qcaus_v1_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip",
         mime="application/zip",
         use_container_width=True,
     )
@@ -508,4 +508,4 @@ else:
     st.info("Click a preset button above or drag & drop an image to begin.")
 
 st.markdown("---")
-st.caption("QCAUS v22.0 | Tony E. Ford | Patent Pending | Verified: QCAUS · StealthPDPRadar · Primordial-Photon-DarkPhoton · Magnetar-Quantum-Vacuum · QCIS · WFC3-PSF · JWST-Pipeline · QCI_AstroEntangle_Refiner")
+st.caption("QCAUS v1.0 | Tony E. Ford | Patent Pending | Verified: QCAUS · StealthPDPRadar · Primordial-Photon-DarkPhoton · Magnetar-Quantum-Vacuum · QCIS · WFC3-PSF · JWST-Pipeline · QCI_AstroEntangle_Refiner")

@@ -392,17 +392,17 @@ if uploaded is not None or st.session_state.get("run"):
     fig_mag, axes = plt.subplots(1, 3, figsize=(15, 5))
 
     im1 = axes[0].imshow(B_n, cmap='plasma', vmin=0, vmax=1)
-    axes[0].set_title(f"Magnetar Dipole B-Field\nB0 = 10^{B0_exp:.1f} G", fontsize=12)
+    axes[0].set_title(f"Magnetar Dipole B-Field\nB0 = 1e{B0_exp:.1f} G", fontsize=12)
     axes[0].axis('off')
     plt.colorbar(im1, ax=axes[0], fraction=0.046, label="|B| / B_max")
 
     im2 = axes[1].imshow(qed_n, cmap='inferno', vmin=0, vmax=1)
-    axes[1].set_title(f"QED Vacuum Polarization\nΔL ∝ (B/B_crit)²", fontsize=12)
+    axes[1].set_title(f"QED Vacuum Polarization\nDelta L ∝ (B/B_crit)^2", fontsize=12)
     axes[1].axis('off')
-    plt.colorbar(im2, ax=axes[1], fraction=0.046, label="ΔL / ΔL_max")
+    plt.colorbar(im2, ax=axes[1], fraction=0.046, label="Delta L / Delta L_max")
 
     im3 = axes[2].imshow(conv_n, cmap='hot', vmin=0, vmax=1)
-    axes[2].set_title(f"Dark Photon Conversion\nP = ε²(1 - e^{-B²/m²})", fontsize=12)
+    axes[2].set_title(f"Dark Photon Conversion\nP = eps^2 (1 - exp(-B^2/m^2))", fontsize=12)
     axes[2].axis('off')
     plt.colorbar(im3, ax=axes[2], fraction=0.046, label="P_conv / P_max")
 
@@ -412,8 +412,8 @@ if uploaded is not None or st.session_state.get("run"):
 
     st.caption(f"""
     **Magnetar Parameters**  
-    • Surface B-field: 10^{B0_exp:.1f} G ({10**B0_exp:.1e} G)  
-    • Critical field: 4.414×10¹³ G  
+    • Surface B-field: 1e{B0_exp:.1f} G ({10**B0_exp:.1e} G)  
+    • Critical field: 4.414e13 G  
     • B/B_crit = {10**B0_exp / 4.414e13:.2e}  
     • Kinetic mixing ε = {mix_mag:.3f}
     """)
@@ -439,12 +439,12 @@ if uploaded is not None or st.session_state.get("run"):
     st.markdown("---")
     st.markdown("### QCIS Power Spectrum")
     fig_ps, ax_ps = plt.subplots(figsize=(10, 4))
-    ax_ps.loglog(k_arr, P_lcdm, "b-", linewidth=2, label="ΛCDM baseline")
+    ax_ps.loglog(k_arr, P_lcdm, "b-", linewidth=2, label="LCDM baseline")
     ax_ps.loglog(k_arr, P_quantum, "r--", linewidth=2,
                  label=f"Quantum  f_NL={f_nl:.1f}  n_q={n_q:.1f}")
     ax_ps.axvline(0.05, color="gray", linestyle=":", alpha=0.5)
     ax_ps.set_xlabel("k (h/Mpc)")
-    ax_ps.set_ylabel("P(k)/P(k₀)")
+    ax_ps.set_ylabel("P(k)/P(k0)")
     ax_ps.set_title("QCIS Matter Power Spectrum")
     ax_ps.legend()
     ax_ps.grid(True, alpha=0.3, which="both")
@@ -458,7 +458,7 @@ if uploaded is not None or st.session_state.get("run"):
     m1.metric("Dark Photon", f"{dark_conf:.1f}%", delta=f"eps={epsilon:.1e}")
     m2.metric("Soliton Peak", f"{float(soliton.max()):.3f}", delta=f"m={m_fdm:.1f}")
     m3.metric("Fringe Contrast", f"{float(interference.std()):.3f}", delta=f"fringe={fringe}")
-    m4.metric("Mixing Angle", f"{omega*0.6:.3f}", delta=f"Ω={omega:.2f}")
+    m4.metric("Mixing Angle", f"{omega*0.6:.3f}", delta=f"Omega={omega:.2f}")
 
     if dark_conf > 50:
         st.error(f"🕳️ STRONG DARK PHOTON CONVERSION — {dark_conf:.0f}%")

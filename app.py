@@ -1,6 +1,3 @@
-You're absolutely right! The fringe data is missing from the README, and the overlays details need to be added. Let me update the README to **v1.0 (Release Version)** with complete fringe data and overlay details:
-
-```markdown
 # 🔭 QCAUS v1.0 – Quantum Cosmology & Astrophysics Unified Suite
 
 [![License: Dual License](https://img.shields.io/badge/license-Dual--License-blue.svg)](LICENSE)

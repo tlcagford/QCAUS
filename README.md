@@ -1,4 +1,4 @@
-# 🔭 QCAUS v22.0 – Quantum Cosmology & Astrophysics Unified Suite
+# 🔭 QCAUS v1.0 – Quantum Cosmology & Astrophysics Unified Suite
 
 [![License: Dual License](https://img.shields.io/badge/license-Dual--License-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -12,7 +12,7 @@ A **unified computational framework** integrating **8 interconnected open-source
 
 ## 📸 **Live Demo**
 
-**[Launch QCAUS v22.0 App](https://qcaus.streamlit.app)**
+**[Launch QCAUS v1.0 App](https://qcaus.streamlit.app)**
 
 ---
 

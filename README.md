@@ -7,7 +7,7 @@
 
 A unified computational framework integrating 8 interconnected open-source projects that explore the quantum nature of the universe – from dark matter solitons to quantum-corrected cosmology, magnetar QED, and stealthdarkleakage detection. 
 
-**[Launch QCAUS App](https://quantum-cosmology-astrophysics-unified-suite.streamlit.app/)**
+**[Launch QCAUS App](https://qcaustfordmodel.streamlit.app/)**
 
 ---
 

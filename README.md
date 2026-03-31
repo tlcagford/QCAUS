@@ -1,20 +1,15 @@
+**Real-time quantum cosmology & astrophysics visualization tool**
 
-**README.md for old projects (archive notice)**
+**Features**
+- Annotated Before/After overlays with live data panels (Ω, Fringe, Mixing, Entropy, Ω_FDM)
+- All 8 verified physics modules
+- Individual download buttons under every image
+- One-click ZIP of all results
+- Preset data including historical airport radar
 
-```markdown
-# Archived Old QCAUS & StealthPDPRadar Projects (v0.1 – v0.9)
-
-**These repositories will be archived on April 14, 2026 (in 2 weeks).**
-
-All previous versions have been superseded by **QCAUS v1.0**.
-
-**Please download any code or data you need before April 14, 2026.**
-
-New unified QCAUS v1.0 contains everything from the old projects plus major improvements (annotated overlays, ZIP export, historical airport presets, full physics display).
-
-**New main project:** QCAUS v1.0 → [your current live link]
-
-— Tony E. Ford, March 31, 2026
+**Run**
+```bash
+streamlit run app.py
 
 
 # 🌌 Quantum Cosmology & Astrophysics Unified Suite (QCAUS)

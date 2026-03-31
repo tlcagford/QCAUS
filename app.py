@@ -16,6 +16,8 @@ from scipy.fft import fft2, ifft2, fftshift
 from scipy.ndimage import gaussian_filter, convolve, uniform_filter
 
 warnings.filterwarnings("ignore")
+matplotlib.rcParams["text.usetex"]       = False
+matplotlib.rcParams["mathtext.default"]  = "regular"
 
 st.set_page_config(page_title="QCAUS v1.0", page_icon="🔭",
                    layout="wide", initial_sidebar_state="expanded")
@@ -322,7 +324,7 @@ def fig_bytes(fig):
 # ===========================================================================
 with st.sidebar:
     st.markdown("## ⚛️ Core Physics")
-    omega_pd    =st.slider("Omega_PD Entanglement",0.05,0.50,0.70,0.01)
+    omega_pd    =st.slider("Omega_PD Entanglement",0.05,0.70,0.20,0.01)
     fringe_scale=st.slider("Fringe Scale (pixels)",10,80,65,1)
     kin_mix     =st.slider("Kinetic Mixing eps",1e-12,1e-8,1e-10,format="%.1e")
     fdm_mass    =st.slider("FDM Mass x10^-22 eV",0.10,10.00,1.00,0.01)
@@ -431,25 +433,25 @@ if img_data is not None:
         for ax in axs.flat: ax.set_facecolor("#111320"); ax.tick_params(colors="white"); ax.grid(True,alpha=0.2)
         axs[0,0].streamplot(Xg,Yg,Bx2,By2,color=np.log10(Bt+1e-10),cmap="plasma",density=1.2)
         axs[0,0].add_patch(Circle((0,0),1,color="white",zorder=5))
-        axs[0,0].set_title(f"B=B₀(R/r)³√(3cos²θ+1)  B₀={B0:.1e}G",color="white",fontsize=10)
+        axs[0,0].set_title(f"B=B0(R/r)^3 sqrt(3cos2th+1)  B0={B0:.2e}G",color="white",fontsize=10)
         im2=axs[0,1].imshow(EHg/(EHg.max()+1e-30),extent=[-rm,rm,-rm,rm],origin="lower",cmap="inferno")
-        axs[0,1].set_title("Euler-Heisenberg ΔL=(α/45π)(B/Bc)²",color="white",fontsize=10)
+        axs[0,1].set_title("Euler-Heisenberg  dL=(a/45pi)(B/Bc)^2  a=1/137",color="white",fontsize=10)
         plt.colorbar(im2,ax=axs[0,1])
         im3=axs[1,0].imshow(dpc/(dpc.max()+1e-30),extent=[-rm,rm,-rm,rm],origin="lower",cmap="hot")
-        axs[1,0].set_title(f"P_conv=ε²(1-e^{{-(B/Bc)²}})  ε={magnetar_eps:.3f}",color="white",fontsize=10)
+        axs[1,0].set_title(f"P_conv=e^2*(1-exp(-(B/Bc)^2))  e={magnetar_eps:.3f}",color="white",fontsize=10)
         plt.colorbar(im3,ax=axs[1,0])
         r1=np.linspace(1.1,rm,200); B1=B0*(1/r1)**3*2
         EH1=(al/(45*np.pi))*(B1/Bc)**2; dp1=(magnetar_eps**2)*(1-np.exp(-(B1/Bc)**2))
         axs[1,1].semilogy(r1,B1,"b-",lw=2,label="|B| on-axis")
         axs[1,1].set_ylabel("|B| (G)",color="b"); axs[1,1].tick_params(axis="y",labelcolor="b")
         ax2t=axs[1,1].twinx()
-        ax2t.plot(r1,EH1/(EH1.max()+1e-30),"r--",lw=2,label="ΔL norm.")
+        ax2t.plot(r1,EH1/(EH1.max()+1e-30),"r--",lw=2,label="dL norm.")
         ax2t.plot(r1,dp1/(dp1.max()+1e-30),"g-.",lw=2,label="P_conv norm.")
         ax2t.set_ylim(0,1); ax2t.set_ylabel("Normalised",color="r")
-        axs[1,1].set_title("Radial Profiles θ=0",color="white",fontsize=10)
+        axs[1,1].set_title("Radial Profiles on-axis",color="white",fontsize=10)
         l1,lb1=axs[1,1].get_legend_handles_labels(); l2,lb2=ax2t.get_legend_handles_labels()
         axs[1,1].legend(l1+l2,lb1+lb2,fontsize=9)
-        plt.suptitle(f"Magnetar QED  B₀=10^{b0_log10:.1f}G  ε={magnetar_eps:.3f}",color="white",fontsize=12)
+        plt.suptitle(f"Magnetar QED  B0=10^{b0_log10:.1f}G  eps={magnetar_eps:.3f}  Bcrit=4.414e13G",color="white",fontsize=12)
         plt.tight_layout(); b=fig_bytes(fig2); plt.close(fig2); return b
 
     def make_ps_plot():
@@ -458,7 +460,7 @@ if img_data is not None:
         ax3.loglog(k_a,Pl,"b-",lw=2,label="ΛCDM baseline")
         ax3.loglog(k_a,Pq,"r--",lw=2,label=f"Quantum f_NL={f_nl:.1f} n_q={n_q:.1f}")
         ax3.axvline(0.05,color="gray",ls=":",alpha=0.5)
-        ax3.set_xlabel("k (h/Mpc)",color="white"); ax3.set_ylabel("P(k)/P(k₀)",color="white")
+        ax3.set_xlabel("k (h/Mpc)",color="white"); ax3.set_ylabel("P(k)/P(k0)",color="white")
         ax3.set_title("QCIS Power Spectrum  BBKS T(k)  n_s=0.965",color="white")
         ax3.legend(labelcolor="white"); ax3.grid(True,alpha=0.3,which="both")
         plt.tight_layout(); b=fig_bytes(fig3); plt.close(fig3); return b
@@ -466,8 +468,8 @@ if img_data is not None:
     def make_fdm_plot():
         fig4,ax4=plt.subplots(figsize=(9,3),facecolor="#0d0f1a")
         ax4.set_facecolor("#111320"); ax4.tick_params(colors="white")
-        ax4.plot(ra,rha,"r-",lw=2.5,label=f"ρ(r)=ρ₀[sin(kr)/(kr)]²  m={fdm_mass:.1f}×10⁻²²eV")
-        ax4.set_xlabel("r (kpc)",color="white"); ax4.set_ylabel("ρ(r)/ρ₀",color="white")
+        ax4.plot(ra,rha,"r-",lw=2.5,label=f"rho(r)=rho0[sin(kr)/(kr)]^2  m={fdm_mass:.1f}x10^-22 eV")
+        ax4.set_xlabel("r (kpc)",color="white"); ax4.set_ylabel("rho(r)/rho0",color="white")
         ax4.set_title("FDM Soliton — Schrödinger-Poisson ground state",color="white")
         ax4.legend(labelcolor="white"); ax4.grid(True,alpha=0.3)
         plt.tight_layout(); b=fig_bytes(fig4); plt.close(fig4); return b

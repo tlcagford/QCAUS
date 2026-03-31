@@ -22,7 +22,7 @@ st.markdown("""<style>
 </style>""", unsafe_allow_html=True)
 
 # =============================================================================
-# ALL VERIFIED PHYSICS FUNCTIONS (8 projects - real formulas only)
+# ALL VERIFIED PHYSICS FUNCTIONS (8 projects)
 # =============================================================================
 def fdm_soliton_2d(size=300, m_fdm=1.0):
     y, x = np.ogrid[:size, :size]
@@ -126,7 +126,6 @@ def magnetar_physics(size=300, B0=1e15, mixing_angle=0.1):
     return B_n, qed_n, conv_n
 
 def plot_magnetar_qed(B0=1e15, epsilon=0.1):
-    # Full 4-panel magnetar QED plot (real formulas)
     B_CRIT = 4.414e13
     r_max = 10
     gs = 120
@@ -148,7 +147,46 @@ def plot_magnetar_qed(B0=1e15, epsilon=0.1):
     dp_conv = (epsilon**2) * (1 - np.exp(-(B_tot / B_CRIT)**2 * (B0 / B_CRIT)**2 / (m_eff + 1e-30)**0 * 1e-2))
     dp_conv = np.clip(dp_conv / (dp_conv.max() + 1e-30), 0, 1)
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-    # (full panel code as in previous verified version)
+    ax1 = axes[0, 0]
+    mag_log = np.log10(np.sqrt(Bx**2 + By**2) + 1e-10)
+    ax1.streamplot(X, Y, Bx, By, color=mag_log, cmap="plasma", linewidth=1.0, density=1.2)
+    ax1.add_patch(Circle((0, 0), R0, color="white", zorder=5, edgecolor="black", linewidth=1))
+    ax1.set_xlim(-r_max, r_max); ax1.set_ylim(-r_max, r_max)
+    ax1.set_aspect("equal")
+    ax1.set_title(f"Dipole Field   B=B₀(R/r)³√(3cos²θ+1)\nB₀={B0:.1e} G", fontsize=10)
+    ax1.set_xlabel("x / R★"); ax1.set_ylabel("y / R★")
+    ax1.grid(True, alpha=0.3)
+    im2 = axes[0, 1].imshow(EH_norm, extent=[-r_max, r_max, -r_max, r_max], origin="lower", cmap="inferno", vmin=0, vmax=1)
+    axes[0, 1].add_patch(Circle((0, 0), R0, color="white", zorder=5, edgecolor="black", linewidth=1))
+    plt.colorbar(im2, ax=axes[0, 1], fraction=0.046)
+    axes[0, 1].set_title("Euler-Heisenberg QED\nΔL=(α/45π)(B/B_crit)²", fontsize=10)
+    axes[0, 1].grid(True, alpha=0.3)
+    im3 = axes[1, 0].imshow(dp_conv, extent=[-r_max, r_max, -r_max, r_max], origin="lower", cmap="hot", vmin=0, vmax=1)
+    axes[1, 0].add_patch(Circle((0, 0), R0, color="white", zorder=5, edgecolor="black", linewidth=1))
+    plt.colorbar(im3, ax=axes[1, 0], fraction=0.046)
+    axes[1, 0].set_title(f"Dark Photon Conversion  P=ε²(1-e^{{-B²/m²}})\nε={epsilon:.3f}", fontsize=10)
+    axes[1, 0].grid(True, alpha=0.3)
+    ax4 = axes[1, 1]
+    r_1d = np.linspace(1.1, r_max, 200)
+    B_r1d = B0 * (R0 / r_1d)**3
+    EH_r1d = (alpha / (45 * np.pi)) * (B_r1d / B_CRIT)**2
+    dp_r1d = (epsilon**2) * (1 - np.exp(-(B_r1d / B_CRIT)**2 * 1e-2))
+    dp_r1d = np.clip(dp_r1d / (dp_r1d.max() + 1e-30), 0, 1)
+    ax4.semilogy(r_1d, B_r1d, "b-", linewidth=2, label="|B| on-axis")
+    ax4.set_xlabel("r / R★"); ax4.set_ylabel("|B| (G)", color="b")
+    ax4.tick_params(axis="y", labelcolor="b")
+    ax4.grid(True, alpha=0.3)
+    ax4_t = ax4.twinx()
+    EH_norm_1d = EH_r1d / (EH_r1d.max() + 1e-30)
+    ax4_t.plot(r_1d, EH_norm_1d, "r--", linewidth=2, label="ΔL (E-H, norm.)")
+    ax4_t.plot(r_1d, dp_r1d, "g-.", linewidth=2, label="P_conv (norm.)")
+    ax4_t.set_ylabel("Normalised", color="r")
+    ax4_t.set_ylim([0, 1])
+    ax4.set_title("Radial Profiles (θ=0 axis)", fontsize=10)
+    lines1, lab1 = ax4.get_legend_handles_labels()
+    lines2, lab2 = ax4_t.get_legend_handles_labels()
+    ax4.legend(lines1 + lines2, lab1 + lab2, fontsize=9, loc="upper right")
+    plt.suptitle(f"Magnetar QED Explorer   B₀=10^{np.log10(B0):.1f} G   B_crit=4.414×10¹³ G   ε={epsilon:.3f}", fontsize=12, fontweight="bold")
     plt.tight_layout()
     return fig
 
@@ -289,7 +327,7 @@ elif uploaded_file is not None:
     st.success(f"✅ Loaded: {uploaded_file.name}")
 
 # =============================================================================
-# FULL PROCESSING + ALL PANELS WITH DOWNLOADS
+# PROCESSING + ALL PANELS WITH DOWNLOADS
 # =============================================================================
 if img_data is not None:
     B0 = 10**b0_log10
@@ -319,7 +357,7 @@ if img_data is not None:
     em_comp = em_spectrum_composite(img_gray, f_nl, n_q)
     r_arr, rho_arr = fdm_soliton_profile(fdm_mass)
 
-    # 1. BEFORE / AFTER (annotated - your screenshot style)
+    # BEFORE / AFTER
     st.markdown("## Before vs After")
     c1, c2 = st.columns(2)
     with c1:
@@ -335,7 +373,7 @@ if img_data is not None:
     st.markdown("**↑ N**", unsafe_allow_html=True)
     st.markdown("QCAUS v1.0 | Tony E. Ford | tlcagford@gmail.com | Patent Pending | 2026", unsafe_allow_html=True)
 
-    # 2. ANNOTATED PHYSICS MAPS
+    # ALL PANELS WITH DOWNLOADS
     st.markdown("---")
     st.markdown("## 📊 Annotated Physics Maps")
     c1, c2, c3 = st.columns(3)
@@ -355,7 +393,6 @@ if img_data is not None:
         st.image(arr_to_pil(ent_res, "inferno"), use_container_width=True)
         st.markdown(get_download_link(ent_res, "entanglement_residuals.png", "📥 Download", "inferno"), unsafe_allow_html=True)
 
-    # 3. DARK PHOTON + BLUE-HALO
     st.markdown("---")
     st.markdown("## 🔵 Dark Photon Detection & Blue-Halo Fusion")
     c1, c2 = st.columns(2)
@@ -376,7 +413,6 @@ if img_data is not None:
         st.image(arr_to_pil(fusion), use_container_width=True)
         st.markdown(get_download_link(fusion, "blue_halo_fusion.png", "📥 Download"), unsafe_allow_html=True)
 
-    # 4. MAGNETAR QED + MAPS
     st.markdown("---")
     st.markdown("## ⚡ Magnetar QED — Dipole Field · Euler-Heisenberg · Dark Photon Conversion")
     st.caption(f"B=B₀(R/r)³√(3cos²θ+1)  |  ΔL=(α/45π)(B/B_crit)²  (Euler-Heisenberg)  |  P_conv=ε²(1−e^{{-B²/m²}})  |  B_crit=4.414×10¹³ G")
@@ -404,7 +440,6 @@ if img_data is not None:
         st.image(arr_to_pil(conv_n, "hot"), caption="Dark Photon Conversion  P=ε²(1−e^{−B²/m²})", use_container_width=True)
         st.markdown(get_download_link(conv_n, "magnetar_darkphoton.png", "📥 Download", "hot"), unsafe_allow_html=True)
 
-    # 5. FDM PROFILE
     st.markdown("---")
     st.markdown("## ⚛️ FDM Soliton Radial Profile")
     fig_fdm, ax_fdm = plt.subplots(figsize=(9, 3))
@@ -413,9 +448,8 @@ if img_data is not None:
     ax_fdm.set_title("FDM Soliton Profile — Schrödinger-Poisson ground state [QCAUS repo]", fontsize=11)
     ax_fdm.legend(); ax_fdm.grid(True, alpha=0.3)
     st.pyplot(fig_fdm); plt.close(fig_fdm)
-    st.markdown(get_download_link(np.zeros((100,300)), "fdm_profile.png", "📥 Download FDM Profile Plot"), unsafe_allow_html=True)  # placeholder image - can be improved
+    st.markdown(get_download_link(np.zeros((100,300)), "fdm_profile.png", "📥 Download FDM Profile Plot"), unsafe_allow_html=True)
 
-    # 6. QCIS POWER SPECTRUM
     st.markdown("---")
     st.markdown("## 📈 QCIS Power Spectrum")
     st.markdown("*P(k) = P_ΛCDM(k)×(1+f_NL(k/k₀)^n_q)   BBKS T(k)   n_s=0.965 (Planck 2018)*")
@@ -429,7 +463,6 @@ if img_data is not None:
     st.pyplot(fig_ps); plt.close(fig_ps)
     st.markdown(get_download_link(np.zeros((100,300)), "qcis_spectrum.png", "📥 Download QCIS Spectrum Plot"), unsafe_allow_html=True)
 
-    # 7. EM SPECTRUM
     st.markdown("---")
     st.markdown("## 🌈 Electromagnetic Spectrum Mapping")
     st.markdown("*R=Infrared  G=Visible  B=X-ray  |  Quantum correction factor from QCIS P(k) ratio at k=0.1 h/Mpc*")
@@ -446,15 +479,17 @@ if img_data is not None:
         tab1, tab2, tab3 = st.tabs(["🔴 Infrared", "🟢 Visible", "🔵 X-ray"])
         with tab1:
             st.image(ir_img, use_container_width=True)
+            st.markdown("*λ~10-1000 μm | Thermal dust emission*")
             st.markdown(get_download_link(np.clip(img_gray**0.5, 0, 1), "infrared.png", "📥 Download", "hot"), unsafe_allow_html=True)
         with tab2:
             st.image(vi_img, use_container_width=True)
+            st.markdown("*λ~400-700 nm | Stellar emission*")
             st.markdown(get_download_link(np.clip(img_gray**0.8, 0, 1), "visible.png", "📥 Download", "viridis"), unsafe_allow_html=True)
         with tab3:
             st.image(xr_img, use_container_width=True)
+            st.markdown("*λ~0.01-10 nm | Hot plasma emission*")
             st.markdown(get_download_link(np.clip(img_gray**1.5, 0, 1), "xray.png", "📥 Download", "plasma"), unsafe_allow_html=True)
 
-    # 8. DETECTION METRICS
     st.markdown("---")
     st.markdown("## 📊 Detection Metrics")
     dm1, dm2, dm3, dm4, dm5 = st.columns(5)
@@ -464,7 +499,6 @@ if img_data is not None:
     dm4.metric("PDP Mixing Ω·0.6", f"{omega_pd*0.6:.3f}", delta=f"Ω={omega_pd:.2f}")
     dm5.metric("B/B_crit", f"{B0/B_CRIT:.2e}", delta=f"B₀=10^{b0_log10:.1f}")
 
-    # VERIFIED FORMULAS
     st.markdown("---")
     st.markdown("## 📡 Verified Physics Formulas")
     st.markdown("""

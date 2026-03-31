@@ -22,7 +22,7 @@ st.markdown("""<style>
 </style>""", unsafe_allow_html=True)
 
 # =============================================================================
-# VERIFIED PHYSICS FUNCTIONS — ALL DEFINED FIRST
+# VERIFIED PHYSICS FUNCTIONS (all 8 projects)
 # =============================================================================
 def fdm_soliton_2d(size=300, m_fdm=1.0):
     y, x = np.ogrid[:size, :size]
@@ -215,7 +215,7 @@ def em_spectrum_composite(img_gray, f_nl, n_q):
     return np.stack([infrared, visible, xray], axis=-1)
 
 # =============================================================================
-# IMAGE UTILITIES + PRESETS
+# IMAGE UTILITIES + PRESETS (historical airport radar + astrophysics)
 # =============================================================================
 def load_image(file):
     if file is not None:
@@ -291,7 +291,7 @@ def get_download_link(arr, filename, label="📥 Download", cmap=None):
     return f'<a href="data:image/png;base64,{b64}" download="{filename}" class="dl-btn">{label}</a>'
 
 # =============================================================================
-# SIDEBAR + UI
+# SIDEBAR + UI WITH DROPDOWN
 # =============================================================================
 with st.sidebar:
     st.markdown("## ⚛️ Core Physics")
@@ -332,7 +332,7 @@ elif uploaded_file is not None:
     st.success(f"✅ Loaded: {uploaded_file.name}")
 
 # =============================================================================
-# PROCESSING + DISPLAY — NICE BEFORE/AFTER OVERLAY
+# FULL PROCESSING + ALL DISPLAY SECTIONS (8 projects restored)
 # =============================================================================
 if img_data is not None:
     B0 = 10**b0_log10
@@ -362,7 +362,7 @@ if img_data is not None:
     em_comp = em_spectrum_composite(img_gray, f_nl, n_q)
     r_arr, rho_arr = fdm_soliton_profile(fdm_mass)
 
-    # NICE BEFORE / AFTER OVERLAY
+    # BEFORE VS AFTER (nice visual overlay restored)
     st.markdown("## Before vs After")
     c1, c2 = st.columns(2)
     with c1:
@@ -375,9 +375,159 @@ if img_data is not None:
         st.image(arr_to_pil(pdp_out, cmap="inferno"), use_container_width=True)
         st.markdown(get_download_link(pdp_out, "pdp_entangled.png", "📥 Download", "inferno"), unsafe_allow_html=True)
 
-    # Rest of your sections (Annotated Maps, Dark Photon, Blue-Halo, Magnetar QED, etc.) are identical to the working version you had before — all visuals restored.
+    # ANNOTATED PHYSICS MAPS
+    st.markdown("---")
+    st.markdown("## 📊 Annotated Physics Maps")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("### ⚛️ FDM Soliton")
+        st.markdown("*ρ(r) = ρ₀[sin(kr)/(kr)]²   k=π/r_s*")
+        st.image(arr_to_pil(soliton, "hot"), use_container_width=True)
+        st.markdown(get_download_link(soliton, "fdm_soliton.png", "📥 Download", "hot"), unsafe_allow_html=True)
+    with c2:
+        st.markdown("### 🌊 PDP Interference (FFT spectral duality)")
+        st.markdown("*oscillation_length = 100/(m_dark·1e9)*")
+        st.image(arr_to_pil(interf, "plasma"), use_container_width=True)
+        st.markdown(get_download_link(interf, "pdp_interference.png", "📥 Download", "plasma"), unsafe_allow_html=True)
+    with c3:
+        st.markdown("### 🕳️ Entanglement Residuals")
+        st.markdown("*S = −ρ·log(ρ) + interference cross-term*")
+        st.image(arr_to_pil(ent_res, "inferno"), use_container_width=True)
+        st.markdown(get_download_link(ent_res, "entanglement_residuals.png", "📥 Download", "inferno"), unsafe_allow_html=True)
 
-    st.success("✅ All physics modules running — nice overlay complete!")
+    # DARK PHOTON + BLUE-HALO
+    st.markdown("---")
+    st.markdown("## 🔵 Dark Photon Detection & Blue-Halo Fusion")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("### Dark Photon Detection Probability")
+        st.markdown("*P_dark = prior·L/(prior·L+(1−prior))  — Bayesian kinetic-mixing*")
+        st.image(arr_to_pil(dp_prob, "YlOrRd"), use_container_width=True)
+        st.markdown(get_download_link(dp_prob, "dp_detection.png", "📥 Download", "YlOrRd"), unsafe_allow_html=True)
+        if dp_peak > 50:
+            st.error(f"STRONG DARK PHOTON SIGNAL — P_dark = {dp_peak:.0f}%")
+        elif dp_peak > 20:
+            st.warning(f"DARK PHOTON SIGNAL — P_dark = {dp_peak:.0f}%")
+        else:
+            st.success(f"CLEAR — P_dark = {dp_peak:.0f}% (below threshold)")
+    with c2:
+        st.markdown("### Blue-Halo Fusion  γ=0.45")
+        st.markdown("*R=original  G=residuals  B=dark_mode  — pdp_radar_core.py*")
+        st.image(arr_to_pil(fusion), use_container_width=True)
+        st.markdown(get_download_link(fusion, "blue_halo_fusion.png", "📥 Download"), unsafe_allow_html=True)
+
+    # MAGNETAR QED + MAPS
+    st.markdown("---")
+    st.markdown("## ⚡ Magnetar QED — Dipole Field · Euler-Heisenberg · Dark Photon Conversion")
+    st.caption(f"B=B₀(R/r)³√(3cos²θ+1)  |  ΔL=(α/45π)(B/B_crit)²  (Euler-Heisenberg)  |  P_conv=ε²(1−e^{{-B²/m²}})  |  B_crit=4.414×10¹³ G")
+    try:
+        fig_mag = plot_magnetar_qed(B0, magnetar_eps)
+        st.pyplot(fig_mag, use_container_width=True)
+        buf = io.BytesIO()
+        fig_mag.savefig(buf, format="png", dpi=100, bbox_inches="tight")
+        buf.seek(0)
+        b64 = base64.b64encode(buf.getvalue()).decode()
+        st.markdown(f'<a href="data:image/png;base64,{b64}" download="magnetar_qed.png" class="dl-btn">📥 Download Plot</a>', unsafe_allow_html=True)
+        plt.close(fig_mag)
+    except Exception as e:
+        st.error(f"Magnetar plot error: {e}")
+
+    st.markdown("### Magnetar Field Maps")
+    cA, cB, cC = st.columns(3)
+    with cA:
+        st.image(arr_to_pil(B_n, "plasma"), caption="Dipole |B| map  B=B₀(R/r)³√(3cos²θ+1)", use_container_width=True)
+        st.markdown(get_download_link(B_n, "magnetar_B.png", "📥 Download", "plasma"), unsafe_allow_html=True)
+    with cB:
+        st.image(arr_to_pil(qed_n, "inferno"), caption="Euler-Heisenberg QED  ΔL=(α/45π)(B/B_crit)²", use_container_width=True)
+        st.markdown(get_download_link(qed_n, "magnetar_QED.png", "📥 Download", "inferno"), unsafe_allow_html=True)
+    with cC:
+        st.image(arr_to_pil(conv_n, "hot"), caption="Dark Photon Conversion  P=ε²(1−e^{−B²/m²})", use_container_width=True)
+        st.markdown(get_download_link(conv_n, "magnetar_darkphoton.png", "📥 Download", "hot"), unsafe_allow_html=True)
+
+    st.markdown("### 📋 Magnetar Parameters")
+    mm1, mm2, mm3, mm4 = st.columns(4)
+    mm1.metric("Surface B-field", f"{B0:.2e} G")
+    mm2.metric("B_crit", f"{B_CRIT:.3e} G")
+    mm3.metric("B/B_crit", f"{B0/B_CRIT:.2e}")
+    mm4.metric("Kinetic mixing ε", f"{magnetar_eps:.3f}")
+
+    # FDM RADIAL PROFILE
+    st.markdown("---")
+    st.markdown("## ⚛️ FDM Soliton Radial Profile")
+    fig_fdm, ax_fdm = plt.subplots(figsize=(9, 3))
+    ax_fdm.plot(r_arr, rho_arr, "r-", linewidth=2.5, label=f"ρ(r)=ρ₀[sin(kr)/(kr)]²  m={fdm_mass:.1f}×10⁻²² eV")
+    ax_fdm.set_xlabel("r (kpc)"); ax_fdm.set_ylabel("ρ(r)/ρ₀")
+    ax_fdm.set_title("FDM Soliton Profile — Schrödinger-Poisson ground state [QCAUS repo]", fontsize=11)
+    ax_fdm.legend(); ax_fdm.grid(True, alpha=0.3)
+    st.pyplot(fig_fdm); plt.close(fig_fdm)
+
+    # QCIS POWER SPECTRUM
+    st.markdown("---")
+    st.markdown("## 📈 QCIS Power Spectrum")
+    st.markdown("*P(k) = P_ΛCDM(k)×(1+f_NL(k/k₀)^n_q)   BBKS T(k)   n_s=0.965 (Planck 2018)*")
+    fig_ps, ax_ps = plt.subplots(figsize=(10, 4))
+    ax_ps.loglog(k_arr, P_lcdm, "b-", linewidth=2, label="ΛCDM baseline")
+    ax_ps.loglog(k_arr, P_quantum, "r--", linewidth=2, label=f"Quantum  f_NL={f_nl:.1f}  n_q={n_q:.1f}")
+    ax_ps.axvline(0.05, color="gray", linestyle=":", alpha=0.5, label="Pivot k₀=0.05 h/Mpc")
+    ax_ps.set_xlabel("k (h/Mpc)"); ax_ps.set_ylabel("P(k)/P(k₀)")
+    ax_ps.set_title("QCIS Matter Power Spectrum  (BBKS T(k), n_s=0.965) [QCIS repo]", fontsize=11)
+    ax_ps.legend(); ax_ps.grid(True, alpha=0.3, which="both")
+    st.pyplot(fig_ps); plt.close(fig_ps)
+
+    # EM SPECTRUM
+    st.markdown("---")
+    st.markdown("## 🌈 Electromagnetic Spectrum Mapping")
+    st.markdown("*R=Infrared  G=Visible  B=X-ray  |  Quantum correction factor from QCIS P(k) ratio at k=0.1 h/Mpc*")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("### 🎨 EM Composite")
+        st.image(arr_to_pil(em_comp), use_container_width=True)
+        st.markdown(get_download_link(em_comp, "em_composite.png", "📥 Download"), unsafe_allow_html=True)
+    with c2:
+        st.markdown("### 📊 Individual EM Bands")
+        ir_img = _apply_cmap(np.clip(img_gray**0.5, 0, 1), "hot")
+        vi_img = _apply_cmap(np.clip(img_gray**0.8, 0, 1), "viridis")
+        xr_img = _apply_cmap(np.clip(img_gray**1.5, 0, 1), "plasma")
+        tab1, tab2, tab3 = st.tabs(["🔴 Infrared", "🟢 Visible", "🔵 X-ray"])
+        with tab1:
+            st.image(ir_img, use_container_width=True)
+            st.markdown("*λ~10-1000 μm | Thermal dust emission*")
+            st.markdown(get_download_link(np.clip(img_gray**0.5, 0, 1), "infrared.png", "📥 Download", "hot"), unsafe_allow_html=True)
+        with tab2:
+            st.image(vi_img, use_container_width=True)
+            st.markdown("*λ~400-700 nm | Stellar emission*")
+            st.markdown(get_download_link(np.clip(img_gray**0.8, 0, 1), "visible.png", "📥 Download", "viridis"), unsafe_allow_html=True)
+        with tab3:
+            st.image(xr_img, use_container_width=True)
+            st.markdown("*λ~0.01-10 nm | Hot plasma emission*")
+            st.markdown(get_download_link(np.clip(img_gray**1.5, 0, 1), "xray.png", "📥 Download", "plasma"), unsafe_allow_html=True)
+
+    # DETECTION METRICS
+    st.markdown("---")
+    st.markdown("## 📊 Detection Metrics")
+    dm1, dm2, dm3, dm4, dm5 = st.columns(5)
+    dm1.metric("P_dark Peak", f"{dp_peak:.1f}%", delta=f"eps={kin_mix:.1e}")
+    dm2.metric("FDM Soliton Peak", f"{float(soliton.max()):.3f}", delta=f"m={fdm_mass:.1f}")
+    dm3.metric("Fringe Contrast", f"{float(interf.std()):.3f}", delta=f"fringe={fringe_scale}")
+    dm4.metric("PDP Mixing Ω·0.6", f"{omega_pd*0.6:.3f}", delta=f"Ω={omega_pd:.2f}")
+    dm5.metric("B/B_crit", f"{B0/B_CRIT:.2e}", delta=f"B₀=10^{b0_log10:.1f}")
+
+    # VERIFIED FORMULAS
+    st.markdown("---")
+    st.markdown("## 📡 Verified Physics Formulas")
+    st.markdown("""
+| Module | Formula | Source Repo |
+|--------|---------|-------------|
+| **FDM Soliton** | ρ(r) = ρ₀[sin(kr)/(kr)]²   k=π/r_s   r_s=1/m | QCAUS/app.py |
+| **PDP Spectral Duality** | FFT: dark_mask = ε·e^{-ΩR²}·abs(sin(2πRL/f))·(1-e^{-R²/f}) | StealthPDPRadar/pdp_radar_core.py |
+| **Entanglement Residuals** | S = -ρ·log(ρ) + abs(ψ_ord+ψ_dark)²-ψ_ord²-ψ_dark² | StealthPDPRadar/pdp_radar_core.py |
+| **Dark Photon Detection** | P_dark = prior·L/(prior·L+(1-prior)) | StealthPDPRadar/pdp_radar_core.py |
+| **Blue-Halo Fusion** | R=original G=residuals B=dark  γ=0.45 | StealthPDPRadar/pdp_radar_core.py |
+| **Magnetar Dipole** | B = B₀(R/r)³√(3cos²θ+1)   B_crit=4.414×10¹³ G | Magnetar-Quantum-Vacuum repo |
+| **Euler-Heisenberg QED** | ΔL = (α/45π)(B/B_crit)² | Magnetar-Quantum-Vacuum repo |
+| **Dark Photon Conversion** | P_conv = ε²(1−e^{−B²/m²}) | Magnetar-Quantum-Vacuum repo |
+| **QCIS Power Spectrum** | P(k) = P_ΛCDM(k)×(1+f_NL(k/k₀)^n_q) | Quantum-Cosmology-Integration-Suite |
+""")
 
 # Footer
 st.markdown("---")

@@ -1,3 +1,14 @@
+
+# 🌌 Quantum Cosmology & Astrophysics Unified Suite (QCAUS)
+
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://quantum-cosmology-astrophysics-unified-suite.streamlit.app/)
+[![License](https://img.shields.io/badge/License-Dual%20License-blue.svg)](LICENSE)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+
+A unified computational framework integrating 8 interconnected open-source projects that explore the quantum nature of the universe – from dark matter solitons to quantum-corrected cosmology, magnetar QED, and stealthdarkleakage detection. 
+
+**[Launch QCAUS App](https://qcaustfordmodel.streamlit.app/)**
+
 **Real-time quantum cosmology & astrophysics visualization tool**
 
 **Features**
@@ -10,18 +21,6 @@
 **Run**
 ```bash
 streamlit run app.py
-
-
-# 🌌 Quantum Cosmology & Astrophysics Unified Suite (QCAUS)
-
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://quantum-cosmology-astrophysics-unified-suite.streamlit.app/)
-[![License](https://img.shields.io/badge/License-Dual%20License-blue.svg)](LICENSE)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-
-A unified computational framework integrating 8 interconnected open-source projects that explore the quantum nature of the universe – from dark matter solitons to quantum-corrected cosmology, magnetar QED, and stealthdarkleakage detection. 
-
-**[Launch QCAUS App](https://qcaustfordmodel.streamlit.app/)**
-
 ---
 
 ## 🔭 Projects Overview

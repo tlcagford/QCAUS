@@ -1,92 +1,228 @@
-# 🌌 Quantum Cosmology & Astrophysics Unified Suite (QCAUS)
+# 🔭 Quantum Cosmology & Astrophysics Unified Suite (QCAUS) v1.0
 
-A unified computational framework integrating 8 interconnected open-source projects that explore the quantum nature of the universe – from dark matter solitons to quantum-corrected cosmology, magnetar QED, and stealthdarkleakage detection. 
+> *"Exploring the quantum nature of the universe — from dark matter solitons to quantum-corrected cosmology."*
 
-**[Launch QCAUS App](https://qcaustfordmodel.streamlit.app/)**
+A unified computational framework integrating **9 physics pipelines** across 8 interconnected open-source projects. QCAUS enables real-time interactive exploration of fuzzy dark matter, photon–dark photon entanglement, magnetar QED, primordial quantum cosmology, and stealth dark-leakage detection — all in a single Streamlit application.
 
-**Real-time quantum cosmology & astrophysics visualization tool**
+**[🚀 Launch Live App](https://qcaustfordmodel.streamlit.app/)**
 
-**Features**
-- Annotated Before/After overlays with live data panels (Ω, Fringe, Mixing, Entropy, Ω_FDM)
-- All 8 verified physics modules
-- Individual download buttons under every image
-- One-click ZIP of all results
-- Preset data including historical airport radar
-
-**Run**
-```bash
-streamlit run app.py
----
-7. 
-**Real-time quantum cosmology & astrophysics visualization tool**
-
-**Features**
-
-- Annotated Before/After overlays with live data panels (Ω, Fringe, Mixing, Entropy, Ω_FDM)
-- All 8 verified physics modules
-- Individual download buttons under every image
-- One-click ZIP of all results
-- Preset data including historical airport radar
-
-**Run**
-
-    streamlit run app.py
+**Tony E. Ford** | tlcagford@gmail.com | Patent Pending | 2026
 
 ---
 
-## 🔭 Projects Overview
+## ✨ What's New in v1.0 (2026)
 
-### 1. QCI AstroEntangle Refiner
-**FDM Soliton Physics + Photon-DarkPhoton Entanglement Overlay**
-
-| Feature | Description |
-|---------|-------------|
-| **FDM Soliton** | Fuzzy Dark Matter soliton core: ρ(r) = ρ₀ [sin(kr)/(kr)]² |
-| **PDP Entanglement** | Photon-DarkPhoton kinetic mixing: ℒ_mix = (ε/2) F_μν F'^μν |
-| **Image Processing** | Upload FITS, JPEG, PNG images; apply quantum overlays |
-| **Annotated Comparison** | Before/after views with scale bars and metrics |
-| **Radar-Style Overlay** | Green speckles (FDM) + Blue halos (PDP) for stealth detection visualization |
-
-### 2. Magnetar QED Explorer
-**Strong-Field Quantum Electrodynamics in Magnetar Magnetospheres**
-
-| Feature | Description |
-|---------|-------------|
-| **Dipole Field** | B = B₀ (R/r)³ (2 cosθ, sinθ) |
-| **Vacuum Polarization** | Euler-Heisenberg effect: ΔL = (α/45π) (B/B_crit)² |
-| **Dark Photon Conversion** | P_conversion = ε² (1 - e^{-B²/m²}) |
-| **Interactive Visualization** | Real-time parameter adjustment for B-field, mixing angle |
-
-### 3. Primordial Photon-DarkPhoton Entanglement
-**Von Neumann Evolution in the Expanding Universe**
-
-| Feature | Description |
-|---------|-------------|
-| **Von Neumann Equation** | i∂ρ/∂t = [H_eff, ρ] |
-| **Entanglement Entropy** | S = -Tr(ρ log ρ) |
-| **Mixing Probability** | \|⟨ψ_d\|ψ_γ⟩\|² |
-| **Time Evolution** | Simulates photon-dark photon oscillation in early universe |
-
-### 4. QCIS – Quantum Cosmology Integration Suite
-**Quantum-Corrected Cosmological Perturbations**
-
-| Feature | Description |
-|---------|-------------|
-| **Quantum-Corrected Power Spectrum** | P(k) = P_ΛCDM(k) × (1 + f_NL (k/k₀)^n_q) |
-| **Non-Gaussianity** | f_NL parameter for primordial fluctuations |
-| **Spectral Index** | n_q for quantum corrections |
-| **ΛCDM Comparison** | Side-by-side comparison with standard cosmology |
+- **9 complete physics pipelines** — up from 4 partial modules
+- **RGB quantum overlay on source image** — 🟢 FDM soliton · 🔵 PDP interference · 🔴 original + detection
+- **Animated two-field FDM wave** showing Re(ψ_light), Re(ψ_dark), and ρ interference all as distinct traces
+- **Von Neumann Primordial Entanglement** — full density matrix evolution with entropy and mixing probability plots
+- **Per-panel source credits** — every visualization tagged with its repo, formula, and authorship
+- **Dark space theme** throughout app and all matplotlib figures
+- **9-pipeline metrics dashboard** with live scalar readouts for all physics outputs
+- **One-click ZIP download** of all 14+ result images including real matplotlib figures
+- All download buttons now save actual rendered figures (not placeholder arrays)
+- Kinetic mixing ε used correctly as dimensionless — dimensional bug fixed
 
 ---
 
-## 📊 Key Metrics & Outputs
+## 🔭 9 Physics Pipelines
 
-| Project | Key Outputs | Download Format |
-|---------|-------------|-----------------|
-| **QCI AstroEntangle** | Annotated comparison, radar-style overlay, FDM soliton map, PDP entanglement map | PNG, JSON |
-| **Magnetar QED** | B-field map, QED polarization, dark photon conversion | PNG, NPZ |
-| **Primordial Entanglement** | Entropy evolution, mixing probability time series | PNG, JSON, NPY |
-| **QCIS** | Power spectra, quantum enhancement ratio | PNG, JSON, NPY |
+### Pipeline 1 — FDM Soliton
+**Fuzzy Dark Matter Soliton Core**  
+*Repo: QCAUS/app.py*
+
+The ground-state solution of the Schrödinger-Poisson equation for ultra-light bosons (~10⁻²² eV):
+
+```
+ρ(r) = ρ₀ [sin(kr) / (kr)]²     k = π/r_s     r_s = 1/m
+```
+
+Produces a 2D spatial density map and radial profile. The soliton scale r_s is set by the FDM mass slider. Overlaid as the **green channel** on the RGB image output.
+
+| Parameter | Range | Default |
+|-----------|-------|---------|
+| FDM Mass (×10⁻²² eV) | 0.1 – 10.0 | 1.0 |
+
+---
+
+### Pipeline 2 — Photon–Dark Photon Spectral Duality
+**FFT Kinetic Mixing / PDP Interference**  
+*Repo: StealthPDPRadar / pdp_radar_core.py*
+
+An original Fourier-domain filter (Ford 2026) separating ordinary and dark photon modes in image space:
+
+```
+dark_mask = ε · e^{-ΩR²} · |sin(2πRL/f)| · (1 − e^{-R²/f})
+```
+
+The oscillation length `L = 100 / (m_dark_GeV × 10⁹)` connects the dark photon mass to the fringe spacing. The **PDP interference map** is overlaid as the **blue channel** on the RGB output. Also drives the animated two-field wave.
+
+| Parameter | Range | Default |
+|-----------|-------|---------|
+| Kinetic Mixing ε | 1×10⁻¹² – 1×10⁻⁸ | 1×10⁻¹⁰ |
+| Fringe Scale (pixels) | 10 – 80 | 45 |
+| Ω_PD Entanglement | 0.05 – 0.50 | 0.20 |
+
+---
+
+### Pipeline 3 — Entanglement Residuals
+**Extended Von Neumann Entropy with Cross-Terms**  
+*Repo: StealthPDPRadar / pdp_radar_core.py*
+
+An original formulation (Ford 2026) extending standard entropy with spatial interference cross-terms:
+
+```
+S_res = −ρ · log(ρ) + |ψ_ord + ψ_dark|² − ψ_ord² − ψ_dark²
+```
+
+The cross-terms encode entanglement structure beyond scalar entropy, providing a 2D spatial map of quantum correlation complexity in image space.
+
+---
+
+### Pipeline 4 — Dark Photon Detection (Bayesian)
+**Kinetic-Mixing Probability Map**  
+*Repo: StealthPDPRadar / pdp_radar_core.py*
+
+Standard Bayesian update applied to the dark mode and residuals fields:
+
+```
+P_dark = (prior · L) / (prior · L + (1 − prior))
+```
+
+Outputs a probability heatmap with threshold alerts: CLEAR (<20%) / SIGNAL (20–50%) / STRONG (>50%). Overlaid as the **red channel** enhancement on the RGB output.
+
+---
+
+### Pipeline 5 — Blue-Halo Fusion
+**Multi-Channel Composite Detection Image**  
+*Repo: StealthPDPRadar / pdp_radar_core.py*
+
+Original composite rendering (Ford 2026) applying gamma correction γ = 0.45:
+
+```
+R = original signal
+G = entanglement residuals (enhanced local contrast)
+B = dark mode (Gaussian smoothed + direct)
+output = clip(RGB ^ 0.45, 0, 1)
+```
+
+Produces the characteristic blue halo signature around dark photon field concentrations.
+
+---
+
+### Pipeline 6 — RGB Quantum Overlay on Source Image
+**Direct Astrophysical Image Enhancement**  
+*Repo: QCAUS/app.py (Ford 2026)*
+
+Original channel-mapped overlay (Ford 2026) applied directly to the uploaded or preset astronomical image using the Ω_PD entanglement parameter:
+
+```
+R = image · (1 − Ω·0.3) + P_dark · Ω·0.4    ← original signal + detection highlight
+G = image · (1 − Ω·0.5) + soliton · Ω·0.8   ← FDM dark matter density
+B = image · (1 − Ω·0.5) + interf · Ω·0.8    ← PDP fringe interference
+```
+
+This is the primary "before/after" output — the source image with all three quantum fields rendered as distinct colour channels.
+
+---
+
+### Pipeline 7 — Magnetar QED Explorer
+**Strong-Field Quantum Electrodynamics**  
+*Repo: Magnetar-Quantum-Vacuum-Engineering*
+
+Three physics models computed over the magnetar dipole field:
+
+| Quantity | Formula | Basis |
+|----------|---------|-------|
+| Dipole field | B = B₀(R/r)³ √(3cos²θ + 1) | Jackson 1998 |
+| Euler-Heisenberg | ΔL = (α/45π)(B/B_crit)² | Heisenberg & Euler 1936 |
+| Dark photon conversion | P = ε²(1 − e^{−B²/m²}) | Ford 2026 (modified form) |
+
+Critical field: B_crit = 4.414 × 10¹³ G. Output is a 4-panel figure: dipole streamplot, EH heatmap, P_conv heatmap, and radial profiles.
+
+| Parameter | Range | Default |
+|-----------|-------|---------|
+| B₀ (log₁₀ G) | 13.0 – 16.0 | 15.0 |
+| Magnetar ε | 0.01 – 0.50 | 0.10 |
+
+---
+
+### Pipeline 8 — QCIS Matter Power Spectrum & EM Mapping
+**Quantum-Corrected Cosmological Perturbations**  
+*Repo: Quantum-Cosmology-Integration-Suite*
+
+Quantum-corrected power spectrum using the BBKS transfer function (Ford 2026 parameterisation):
+
+```
+P(k) = P_ΛCDM(k) × (1 + f_NL · (k/k₀)^n_q)     k₀ = 0.05 h/Mpc
+```
+
+BBKS transfer function T(k) with n_s = 0.965 (Planck 2018). Outputs log-log spectrum plot comparing ΛCDM baseline to quantum-corrected prediction, plus a tri-band EM composite:
+
+```
+R = Infrared   (img^0.5 × Q_factor)     λ ~ 10–1000 μm
+G = Visible    (img^0.8 × Q_factor)     λ ~ 400–700 nm
+B = X-ray      (img^1.5 × Q_factor)     λ ~ 0.01–10 nm
+```
+
+where Q_factor = P_quantum(k=0.1) / P_ΛCDM(k=0.1) is the quantum correction ratio.
+
+| Parameter | Range | Default |
+|-----------|-------|---------|
+| f_NL | 0.0 – 5.0 | 1.0 |
+| n_q | 0.0 – 2.0 | 0.5 |
+
+---
+
+### Pipeline 9 — Von Neumann Primordial Entanglement
+**Density Matrix Evolution in the Early Universe**  
+*Repo: Primordial-Photon-DarkPhoton-Entanglement*
+
+Full density matrix time-evolution for primordial photon–dark photon mixing (standard + Ford 2026):
+
+```
+i ∂ρ/∂t = [H_eff, ρ]
+S = −Tr(ρ log ρ) = −Σᵢ λᵢ log λᵢ      (eigenvalues of 2×2 ρ)
+P_mix = ρ_dd(t) = |⟨ψ_d|ψ_γ⟩|²
+```
+
+Outputs a dual-panel figure: Von Neumann entropy evolution S(t) and photon ↔ dark photon oscillation probability ρ_dd(t), with decoherence damping controlled by Ω_PD.
+
+| Parameter | Range | Default |
+|-----------|-------|---------|
+| Dark Mass (×10⁻⁹ eV) | 0.1 – 10.0 | 1.0 |
+| Primordial Mixing θ | 0.01 – 1.00 | 0.10 |
+
+---
+
+## 📊 Key Outputs Summary
+
+| Pipeline | Output | Download |
+|----------|--------|---------|
+| **P1: FDM Soliton** | 2D density map + radial profile | PNG |
+| **P2: PDP Interference** | Fringe pattern + spectral mask | PNG |
+| **P3: Entanglement Residuals** | 2D entropy + cross-term map | PNG |
+| **P4: Dark Photon Detection** | Bayesian probability heatmap | PNG |
+| **P5: Blue-Halo Fusion** | R/G/B composite γ=0.45 | PNG |
+| **P6: RGB Overlay** | Source image + 3-channel quantum overlay | PNG |
+| **P7: Magnetar QED** | 4-panel: dipole, EH, P_conv, radial | PNG |
+| **P8: QCIS Spectrum** | Log-log P(k) + EM composite + 3 bands | PNG |
+| **P9: Von Neumann** | Entropy S(t) + mixing probability | PNG |
+| **ZIP Archive** | All 14+ outputs in one download | ZIP |
+
+---
+
+## 🎯 Preset Datasets
+
+| Preset | Description | Physics Focus |
+|--------|-------------|---------------|
+| **SGR 1806-20 (Magnetar)** | Synthetic magnetar field from dipole model | Pipelines 5, 6, 7 |
+| **Galaxy Cluster (Abell 209 style)** | Gaussian cluster halo + noise | Pipelines 1, 2, 4, 6 |
+| **Airport Radar — Nellis AFB Historical** | Synthetic radar with stealth signatures | Pipeline 4, 5 |
+| **Airport Radar — JFK International Historical** | Synthetic radar field | Pipeline 4, 5 |
+| **Airport Radar — LAX Historical** | Synthetic radar field | Pipeline 4, 5 |
+
+Upload your own FITS, JPEG, or PNG astronomical image to apply all 9 pipelines to real data.
 
 ---
 
@@ -94,10 +230,11 @@ streamlit run app.py
 
 | Format | Extension | Use Case |
 |--------|-----------|----------|
-| **FITS** | .fits, .fit | Astronomical images (Hubble, JWST, Chandra) |
-| **JPEG** | .jpg, .jpeg | Standard images |
+| **FITS** | .fits, .fit | Astronomical (Hubble, JWST, Chandra) |
+| **JPEG** | .jpg, .jpeg | Standard photographic |
 | **PNG** | .png | Lossless images |
-| **BMP** | .bmp | Bitmap images |
+
+Images are converted to grayscale float32 and resized to a maximum of 400×400 for performance. The original aspect ratio and scale are preserved in all output labels.
 
 ---
 
@@ -124,213 +261,133 @@ streamlit>=1.28.0
 numpy>=1.24.0
 scipy>=1.10.0
 matplotlib>=3.7.0
-astropy>=5.3.0  # For FITS support
-Pillow>=10.0.0  # For image processing
+Pillow>=10.0.0
 ```
+
+> **Note:** `astropy` is listed as an optional dependency for native FITS reading. The app will fall back to PIL for standard image formats if astropy is not installed.
 
 ---
 
-## 📖 Physics References
+## 📐 Physics Reference — All Equations
 
-### FDM Soliton
+### Standard Physics (Established Literature)
 
-The Fuzzy Dark Matter soliton is the ground state solution of the Schrödinger-Poisson equation for ultra-light bosons (axions, ~10⁻²² eV):
+| Module | Equation | Source |
+|--------|----------|--------|
+| FDM Soliton profile | ρ(r) = ρ₀[sin(kr)/(kr)]², k=π/r_s | Hui et al. 2017; Ruffini & Bonazzola 1969 |
+| Schrödinger-Poisson | i∂ₜψ = −∇²ψ/(2m) + Φψ, ∇²Φ = 4πG\|ψ\|² | Canonical SP system |
+| Magnetar dipole field | B = B₀(R/r)³√(3cos²θ+1) | Jackson 1998 |
+| Euler-Heisenberg QED | ΔL = (α/45π)(B/B_crit)² | Heisenberg & Euler 1936 |
+| Von Neumann entropy | S = −Tr(ρ log ρ) | Standard quantum mechanics |
+| Bayesian detection | P = prior·L / (prior·L + (1−prior)) | Standard Bayesian inference |
+| BBKS transfer function | T(k) — see code | Bardeen, Bond, Kaiser & Szalay 1986 |
 
-### Photon-DarkPhoton Kinetic Mixing
+### Original Contributions (Ford 2026)
 
-The interaction between photons and dark photons is described by:
-
-where ε is the kinetic mixing angle.
-
-### Von Neumann Evolution
-
-The density matrix evolution for entangled systems:
-
-### Quantum-Corrected Power Spectrum
-
-The matter power spectrum with quantum corrections:
-
----
-
-## 📝 Contributions & Original Work
-
-This section clarifies which components of QCAUS are **standard implementations of established physics** and which represent **original contributions** by the author.
-
-### Standard Implementations (Established Physics)
-
-The following modules implement well-known equations from the published literature. Each is cited appropriately in the code and documentation.
-
-| Module | Equation / Method | Source |
-|--------|-------------------|--------|
-| **FDM Soliton** | ρ(r) = ρ₀ [sin(kr)/(kr)]², k = π/r_s, r_s = 1/m | Standard Fuzzy Dark Matter soliton profile (Hui et al. 2017; Ruffini & Bonazzola 1969) |
-| **Schrödinger-Poisson System** | i∂ₜψ = -∇²ψ/(2m) + Φψ, ∇²Φ = 4πG\|ψ\|² | Canonical SP system for bosonic dark matter |
-| **Magnetar Dipole Field** | B = B₀ (R/r)³ √(3cos²θ + 1) | Standard rotating dipole field (Jackson, 1998) |
-| **Euler-Heisenberg QED** | Δℒ = (α/45π) (B/B_crit)² | One-loop vacuum polarization (Heisenberg & Euler 1936) |
-| **Von Neumann Entropy** | S = -Tr(ρ log ρ) | Standard quantum entropy |
-| **Bayesian Detection** | P_post = (prior·L) / (prior·L + (1-prior)) | Standard Bayesian update |
-| **de Broglie Wavelength** | λ = h/(mv) | Standard wave mechanics |
-
-### Original Contributions (Author's Work)
-
-The following represent **original extensions, syntheses, or novel formulations** developed specifically for QCAUS.
-
-#### 1. Two-Field Coupled Schrödinger-Poisson System
-
-An extension of the standard SP system to two interacting fields, modeling light-dark sector coupling:
-
-```
-i∂ₜψ_t = -∇²ψ_t/(2m_t) + (Φ_t + εΦ_a)ψ_t
-i∂ₜψ_a = -∇²ψ_a/(2m_a) + (Φ_a + εΦ_t)ψ_a
-∇²Φ_t = 4πG|ψ_t|²
-∇²Φ_a = 4πG|ψ_a|²
-```
-
-The coupling term εΦ_a (and symmetric counterpart) provides a non-relativistic analog of kinetic mixing between photon and dark photon sectors. This formulation enables simulation of interference patterns and entanglement metrics in a common gravitational framework.
-
-#### 2. Photon-Dark Photon Interference Density
-
-A novel synthesis of two-field interference applied to light and dark sectors:
-
-```
-ρ = |ψ_t|² + |ψ_a|² + 2·Re(ψ_t* ψ_a e^{iΔφ})
-```
-
-The phase factor e^{iΔφ} represents relative phase evolution between sectors. This formulation produces observable fringe patterns with spacing λ = 2π/|Δk|, applicable to galactic dynamics and potentially laboratory-scale anomalies.
-
-#### 3. PDP Spectral Duality Expression
-
-An original Fourier-domain filter combining optical fringe analysis with dark photon field modeling:
-
-```
-dark_mask = e^{-j(ΩR²)} · |sin(2πRL/f)| · (1 - e^{-j(R²/f)})
-```
-
-This expression, implemented in `StealthPDPRadar/pdp_radar_core.py`, synthesizes Gaussian apodization, fringe periodicity, and phase accumulation into a single spectral mask for dark photon field visualization.
-
-#### 4. Entanglement Residuals with Cross-Terms
-
-An extended entropy formulation incorporating interference cross-terms:
-
-```
-S = -ρ log ρ + |ψ·ord + ψ·d·ark|² - ψ·ord² - ψ·d·ark²
-```
-
-The additional terms encode spatial structure information beyond the standard von Neumann entropy, providing a heuristic metric for entanglement complexity in image-space overlays.
-
-#### 5. Quantum-Corrected Power Spectrum Parameterization
-
-A phenomenological correction to the ΛCDM power spectrum:
-
-```
-P(k) = P_ΛCDM(k) × (1 + f_NL (k/k₀)^{n-q})
-```
-
-The parameters f_NL (non-Gaussianity amplitude), n (quantum correction index), and q (baseline index) allow flexible modeling of quantum gravitational effects on cosmological structure formation.
-
-#### 6. Dark Photon Conversion Probability (Modified Form)
-
-A simplified exponential model for dark photon production in strong magnetic fields:
-
-```
-P_conv = ε² (1 - e^{-(B²/m²)})
-```
-
-This form captures the suppression of conversion at low field strengths and saturation at high fields, providing a computationally efficient alternative to full quantum kinetic calculations.
-
-#### 7. Ω_PD Entanglement Parameter
-
-A scalar parameter introduced to quantify the degree of photon-dark photon entanglement in the two-field system:
-
-```
-Ω_PD = ⟨ψ_t | ψ_a⟩ / √(⟨ψ_t | ψ_t⟩ ⟨ψ_a | ψ_a⟩)
-```
-
-This metric, adjustable via the user interface, controls the mixing strength in interference visualizations.
-
-#### 8. Unified Computational Framework
-
-The primary original contribution is the **integration of all eight modules into a single interactive Streamlit application** with:
-- Real-time parameter exploration
-- Annotated before/after comparisons with scale bars
-- One-click export of all results
-- Support for FITS, JPEG, PNG, and BMP formats
-- Preset data examples for rapid testing
-
-This unification enables cross-disciplinary exploration of quantum astrophysics models that previously existed only in isolated repositories.
-
-### Citation Recommendation
-
-If you use QCAUS in your research, please cite the framework and note which components are standard vs. original as appropriate.
-
-For standard physics components, cite the original literature (e.g., Hui et al. 2017 for FDM solitons). For original extensions, cite:
-
-> Ford, T. E. (2026). *Quantum Cosmology & Astrophysics Unified Suite (QCAUS)*. GitHub. https://github.com/tlcagford/QCAUS
-
-### Acknowledgments
-
-Standard physics implementations were informed by the following key works:
-- **FDM / Schrödinger-Poisson:** Hui et al. (2017), Marsh (2016), Ruffini & Bonazzola (1969)
-- **Magnetar QED:** Heisenberg & Euler (1936), Schwinger (1951)
-- **Dark Photon Kinetic Mixing:** Holdom (1986), Fabbrichesi et al. (2020)
+| # | Contribution | Formula |
+|---|-------------|---------|
+| 1 | **Two-Field Coupled SP System** | i∂ₜψ_t = −∇²ψ_t/(2m_t) + (Φ_t + εΦ_a)ψ_t (and symmetric) |
+| 2 | **PDP Interference Density** | ρ = \|ψ_t\|² + \|ψ_a\|² + 2·Re(ψ_t\*·ψ_a·e^{iΔφ}) |
+| 3 | **PDP Spectral Duality Mask** | dark_mask = ε·e^{−ΩR²}·\|sin(2πRL/f)\|·(1−e^{−R²/f}) |
+| 4 | **Entanglement Residuals** | S_res = −ρ·log(ρ) + \|ψ_ord+ψ_dark\|²−ψ_ord²−ψ_dark² |
+| 5 | **QCIS Quantum Correction** | P(k) = P_ΛCDM(k)×(1 + f_NL·(k/k₀)^n_q) |
+| 6 | **Dark Photon Conversion (simplified)** | P_conv = ε²(1−e^{−B²/m²}) |
+| 7 | **Ω_PD Entanglement Parameter** | Ω_PD = ⟨ψ_t\|ψ_a⟩ / √(⟨ψ_t\|ψ_t⟩⟨ψ_a\|ψ_a⟩) |
+| 8 | **RGB Overlay Channel Mapping** | R=orig+P_dark · G=FDM-soliton · B=PDP-interf |
+| 9 | **Unified 9-Pipeline Framework** | Integration of all pipelines into single interactive app |
 
 ---
 
-## 🚀 Quick Start Examples
-
-### QCI AstroEntangle Refiner
+## 🚀 Quick Start — Python API
 
 ```python
-# Load image and apply FDM + PDP overlays
-from qci_astro import process_qci_astro
-enhanced, soliton, pdp = process_qci_astro(image_data, omega=0.5, fringe=1.0, soliton_scale=1.0)
-```
+import numpy as np
 
-### Magnetar QED Explorer
+# Pipeline 1: FDM Soliton
+from QCAUS_v4 import fdm_soliton_2d, fdm_soliton_profile
+soliton_map = fdm_soliton_2d(size=300, m_fdm=1.0)
+r, rho = fdm_soliton_profile(m_fdm=1.0)
 
-```python
-# Compute magnetar field and dark photon conversion
-from magnetar_qed import process_magnetar
-B_mag, qed, dark_photons = process_magnetar(r_grid, theta_grid, B0=1e15, mixing=0.1)
-```
+# Pipeline 2+3: PDP Spectral Duality + Entanglement Residuals
+from QCAUS_v4 import pdp_spectral_duality, entanglement_residuals
+ord_mode, dark_mode = pdp_spectral_duality(image, omega=0.2, fringe_scale=45,
+                                            mixing_eps=1e-10, fdm_mass=1.0)
+ent_res = entanglement_residuals(image, ord_mode, dark_mode,
+                                  strength=0.06, mixing_eps=1e-10, fringe_scale=45)
 
-### Primordial Entanglement
+# Pipeline 4: Bayesian Dark Photon Detection
+from QCAUS_v4 import dark_photon_detection_prob
+dp_prob = dark_photon_detection_prob(dark_mode, ent_res, strength=0.06)
 
-```python
-# Simulate photon-dark photon entanglement evolution
-from primordial_entanglement import process_primordial_entanglement
-entropy, mixing = process_primordial_entanglement(omega=0.7, dark_mass=1e-9, mixing=0.1)
-```
+# Pipeline 7: Magnetar QED
+from QCAUS_v4 import magnetar_physics, plot_magnetar_qed
+B_map, qed_map, conv_map = magnetar_physics(size=300, B0=1e15, eps=0.1)
+fig = plot_magnetar_qed(B0=1e15, epsilon=0.1)
 
-### QCIS Power Spectra
+# Pipeline 8: QCIS Power Spectrum
+from QCAUS_v4 import qcis_power_spectrum
+k, P_lcdm, P_quantum = qcis_power_spectrum(f_nl=1.0, n_q=0.5)
 
-```python
-# Compute quantum-corrected power spectrum
-from qcis import process_qcis
-P_quantum = process_qcis(k_vals, f_nl=1.0, n_q=0.5)
+# Pipeline 9: Von Neumann Primordial Entanglement
+from QCAUS_v4 import von_neumann_primordial
+t, S, mixing_prob, rho_gg, rho_dd = von_neumann_primordial(
+    omega=0.2, dark_mass=1e-9, mixing=0.1)
 ```
 
 ---
 
 ## 📊 Example Outputs
 
-### Annotated Comparison (Abell-1689)
-- **Before**: Standard HST/JWST data with scale bar (100 kpc)
-- **After**: FDM Soliton + PDP Entanglement overlays
-- **Metrics**: Maximum Mixing Ratio, Minimum Entropy, FDM Value (kpc)
+### Before / After — RGB Quantum Overlay
+- **Before**: Source image in grayscale (HST/JWST public data or preset)
+- **After**: RGB composite — 🟢 FDM soliton density (green) · 🔵 PDP interference (blue) · 🔴 original + dark photon detection (red)
+- **Data panel**: Ω_PD · Fringe · ε · FDM mass · Entropy · P_dark
 
-### Radar-Style Overlay
-- **Green**: FDM Soliton (dark matter density)
-- **Blue**: PDP Entanglement (dark photon field)
-- **Red**: Original astrophysical signal
+### Wave Interference Animation
+- **Re(ψ_light)**: Cyan oscillating light-sector wave — cos(r·cos(t))
+- **Re(ψ_dark)**: Magenta oscillating dark-sector wave — cos(r·sin(t) + Δφ)
+- **ρ interference**: Yellow density — sum + cross-term showing beating pattern
+- **|ψ| envelope**: Dashed — common Gaussian profile exp(−r²/4)
 
-### Magnetar Field Maps
-- **B-Field**: Dipole field structure (B ∝ r⁻³)
-- **QED Polarization**: Euler-Heisenberg vacuum effects
-- **Dark Photons**: Conversion probability maps
+### Magnetar QED (4-panel)
+- **Dipole streamplot**: Field line geometry coloured by log|B|
+- **Euler-Heisenberg heatmap**: Vacuum polarisation ΔL/ΔL_max
+- **Dark photon conversion map**: P_conv/P_max
+- **Radial profiles**: |B|, ΔL (norm.), P_conv (norm.) on twin axes
 
-### Power Spectra
-- **ΛCDM**: Standard cosmology baseline
-- **Quantum**: Corrected spectrum with f_NL and n_q parameters
+### Von Neumann Primordial Entanglement
+- **Entropy S(t)**: Von Neumann entropy rising from zero as decoherence builds
+- **ρ_dd(t)**: Photon → dark photon oscillation probability with damping
+
+---
+
+## 📝 Contributions & Original Work
+
+### Standard Implementations
+
+These modules implement established physics from the peer-reviewed literature and are cited accordingly in the code.
+
+| Module | Basis |
+|--------|-------|
+| FDM soliton profile | Hui et al. 2017; Marsh 2016 |
+| Schrödinger-Poisson | Ruffini & Bonazzola 1969 |
+| Magnetar dipole | Jackson 1998 |
+| Euler-Heisenberg | Heisenberg & Euler 1936; Schwinger 1951 |
+| Von Neumann entropy | Standard quantum mechanics |
+| Bayesian inference | Standard probability theory |
+| BBKS transfer function | Bardeen et al. 1986 |
+
+### Original Contributions (Ford 2026)
+
+Nine original extensions and syntheses developed specifically for QCAUS, listed in the Physics Reference table above. The primary novel contributions are:
+
+1. The **two-field coupled Schrödinger-Poisson system** treating light and dark sector fields on equal footing in a shared gravitational potential, enabling direct simulation of interference and entanglement between sectors.
+
+2. The **PDP spectral duality mask** — a Fourier-domain filter that synthesises Gaussian apodisation, fringe periodicity, and kinetic mixing phase accumulation into a single expression for dark photon field extraction from image data.
+
+3. The **Ω_PD entanglement parameter** as a scalar control for the mixing strength between sectors, with a defined normalisation relative to the inner products of both wavefunctions.
+
+4. The **unified 9-pipeline application** integrating all modules with real-time parameter exploration and cross-disciplinary output.
 
 ---
 
@@ -340,13 +397,15 @@ If you use QCAUS in your research, please cite:
 
 ```bibtex
 @software{Ford2026QCAUS,
-  author = {Ford, Tony E.},
-  title = {Quantum Cosmology \& Astrophysics Unified Suite (QCAUS)},
-  year = {2026},
-  url = {https://github.com/tlcagford/QCAUS},
-  doi = {10.5281/zenodo.xxxxxxx}
+  author    = {Ford, Tony E.},
+  title     = {Quantum Cosmology \& Astrophysics Unified Suite (QCAUS) v1.0},
+  year      = {2026},
+  url       = {https://github.com/tlcagford/QCAUS},
+  note      = {Patent Pending}
 }
 ```
+
+For standard physics components, please also cite the original literature (see Physics Reference section above).
 
 ---
 
@@ -355,57 +414,59 @@ If you use QCAUS in your research, please cite:
 This project is released under a **Dual License**:
 
 - **Academic / Non-Commercial Use**: Free for research, education, and personal projects
-- **Commercial Use**: Requires a separate license. Please contact the author for details.
+- **Commercial Use**: Requires a separate license — contact the author
 
-See the `LICENSE` file for full terms.
+See `LICENSE` for full terms.
 
 ---
 
 ## 📧 Contact
 
 **Tony E. Ford**  
-Independent Researcher / Astrophysics & Quantum Systems  
-GitHub: @tlcagford  
-Email: tlcagford@gmail.com
+Independent Researcher — Astrophysics & Quantum Systems  
+GitHub: [@tlcagford](https://github.com/tlcagford)  
+Email: tlcagford@gmail.com  
+App: [qcaustfordmodel.streamlit.app](https://qcaustfordmodel.streamlit.app/)
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **NASA/ESA Hubble Space Telescope & JWST** for public FITS data
-- **OpenSky Network** for radar data integration
-- **FDM, QED, and cosmology communities** for foundational research
-- **Streamlit, NumPy, SciPy, Matplotlib, Astropy** for open-source tools
+- **NASA/ESA Hubble Space Telescope & JWST** — public FITS data used in example outputs
+- **OpenSky Network** — historical radar data for preset examples
+- **FDM, QED, and cosmology research communities** — foundational literature
+- **Streamlit, NumPy, SciPy, Matplotlib, Pillow** — open-source toolchain
 
 ---
 
-## 🔗 Related Projects
+## 🔗 Related Repositories
 
-| Project | Repository |
-|---------|------------|
-| **StealthPDPRadar** | StealthPDPRadar |
-| **Magnetar QED Explorer** | Magnetar-Quantum-Vacuum-Engineering |
-| **Primordial Entanglement** | Primordial-Photon-DarkPhoton-Entanglement |
-| **QCIS** | Quantum-Cosmology-Integration-Suite |
-
----
-
-_"Exploring the quantum nature of the universe – from dark matter solitons to quantum-corrected cosmology."_
+| Project | Description |
+|---------|-------------|
+| [StealthPDPRadar](https://github.com/tlcagford/StealthPDPRadar) | Photon–dark photon radar core (pdp_radar_core.py) — Pipelines 2–5 |
+| [Magnetar-Quantum-Vacuum-Engineering](https://github.com/tlcagford/Magnetar-Quantum-Vacuum-Engineering) | Magnetar QED explorer — Pipeline 7 |
+| [Primordial-Photon-DarkPhoton-Entanglement](https://github.com/tlcagford/Primordial-Photon-DarkPhoton-Entanglement) | Von Neumann evolution — Pipeline 9 |
+| [Quantum-Cosmology-Integration-Suite](https://github.com/tlcagford/Quantum-Cosmology-Integration-Suite) | QCIS power spectrum — Pipeline 8 |
 
 ---
 
 ## 📸 Screenshots
 
-### QCI AstroEntangle Refiner
-*Annotated before/after comparison of Abell-1689 with FDM Soliton and PDP Entanglement overlays*
+### RGB Quantum Overlay (Before / After)
+*Source image in grayscale vs. RGB composite with FDM soliton (green), PDP interference (blue), and dark photon detection (red) overlaid directly on the astrophysical data*
+
+### Animated FDM Two-Field Wave
+*Re(ψ_light) in cyan and Re(ψ_dark) in magenta oscillating with phase separation driven by cos(t) vs sin(t) — ρ interference in yellow shows the beating pattern*
 
 ### Magnetar QED Explorer
-*Magnetar dipole field with quantum vacuum polarization and dark photon conversion*
+*4-panel figure: dipole field streamplot · Euler-Heisenberg vacuum polarisation heatmap · dark photon conversion map · radial profile comparison*
 
-### Primordial Entanglement
-*Von Neumann entropy evolution and photon-dark photon mixing probability*
+### QCIS Matter Power Spectrum
+*Log-log P(k) comparison of ΛCDM baseline (blue) vs. quantum-corrected QCIS prediction (red dashed) with pivot scale marker*
 
-### QCIS Power Spectra
-*Quantum-corrected matter power spectrum vs ΛCDM*
+### Von Neumann Primordial Entanglement
+*Left: Von Neumann entropy S(t) with area fill. Right: photon ↔ dark photon oscillation probability ρ_dd(t) with decoherence damping*
 
 ---
+
+*QCAUS v1.0 | Tony E. Ford | Patent Pending | 2026*

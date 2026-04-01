@@ -4,17 +4,6 @@ Tony E. Ford | tlcagford@gmail.com | github.com/tlcagford
 
 First Release: April 2026
 All 9 modules fully implemented — no placeholders
-
-Modules:
-1. FDM Soliton & Schrödinger-Poisson System
-2. Magnetar QED Explorer
-3. Primordial Photon-Dark Photon Entanglement
-4. Dark Leakage Detection
-5. QCIS Power Spectra
-6. WFC3 PSF Toolkit
-7. Entanglement-Corrected Cosmology (ECC)
-8. Nickel Laser Experiment (Proposed)
-9. Astronomical Image Refiner
 """
 
 import streamlit as st
@@ -28,9 +17,7 @@ from scipy.integrate import solve_ivp
 
 warnings.filterwarnings('ignore')
 
-# ──────────────────────────────────────────────────────────────────────────────
-# PAGE CONFIG
-# ──────────────────────────────────────────────────────────────────────────────
+# Page config
 st.set_page_config(
     layout="wide",
     page_title="QCAUS v1.0",
@@ -38,14 +25,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ──────────────────────────────────────────────────────────────────────────────
-# CUSTOM CSS
-# ──────────────────────────────────────────────────────────────────────────────
+# Custom CSS
 st.markdown("""
 <style>
     [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #0a0a1a 0%, #0f0f2a 100%); }
     [data-testid="stSidebar"] { background: #0a0a1a; border-right: 2px solid #00aaff; }
-    .stTitle, h1, h2, h3 { color: #00aaff; font-family: 'Courier New', monospace; }
+    .stTitle, h1, h2, h3 { color: #00aaff; }
     .stSlider label, .stNumberInput label, .stSelectbox label { color: #ccccff; }
     .credits-panel {
         background: rgba(0, 40, 60, 0.6);
@@ -86,9 +71,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# SYNTHETIC IMAGE GENERATORS
-# ──────────────────────────────────────────────────────────────────────────────
+# Synthetic image generators
 def generate_point_source(size=256, fwhm=5, center=None, noise=0.01):
     if center is None:
         center = (size//2, size//2)
@@ -150,30 +133,23 @@ def generate_pdp_fringe(size=256, wavelength=20, center=None):
     return fringe
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# CREDITS PANEL FUNCTION
-# ──────────────────────────────────────────────────────────────────────────────
 def show_credits_panel(module_name, original_contributions, standard_sources, key_references):
     orig_text = "".join([f"• {item}<br>" for item in original_contributions])
     std_text = "".join([f"• {item}<br>" for item in standard_sources])
     ref_text = "".join([f"• {ref}<br>" for ref in key_references])
     
-    st.markdown(f"""
-    <div class="credits-panel">
-        <strong>📜 {module_name} — Credits & Attribution</strong><br><br>
-        <strong>🔬 Original Contributions (Tony E. Ford):</strong><br>
-        {orig_text}<br>
-        <strong>📚 Standard Implementations (Cited Sources):</strong><br>
-        {std_text}<br>
-        <strong>📖 Key References:</strong><br>
-        {ref_text}
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="credits-panel">'
+        f'<strong>📜 {module_name} — Credits & Attribution</strong><br><br>'
+        f'<strong>🔬 Original Contributions (Tony E. Ford):</strong><br>{orig_text}<br>'
+        f'<strong>📚 Standard Implementations (Cited Sources):</strong><br>{std_text}<br>'
+        f'<strong>📖 Key References:</strong><br>{ref_text}'
+        f'</div>',
+        unsafe_allow_html=True
+    )
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# MODULE 1: FDM SOLITON & SCHRÖDINGER-POISSON
-# ──────────────────────────────────────────────────────────────────────────────
+# Module 1: FDM Soliton
 def show_fdm_demo():
     st.markdown("### 🔬 FDM Soliton Profile")
     st.markdown(r"""
@@ -214,26 +190,24 @@ def show_fdm_demo():
 def show_fdm_credits():
     show_credits_panel(
         "FDM Soliton & Schrödinger-Poisson",
-        original_contributions=[
+        [
             "Two-field coupled SP system with εΦ mixing",
             "Ω_PD entanglement observable definition",
             "Interference density with phase factor e^{iΔφ}",
             "Integration into QCAUS unified framework"
         ],
-        standard_sources=[
+        [
             "Schrödinger-Poisson system: Ruffini & Bonazzola (1969)",
             "FDM soliton profile: Hui et al. (2017)"
         ],
-        key_references=[
+        [
             "Hui, L., et al. (2017). Ultralight axions in astronomy and cosmology. PRD 95, 043541.",
             "Ruffini, R., & Bonazzola, S. (1969). Systems of self-gravitating particles. PR 187, 1767."
         ]
     )
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# MODULE 2: MAGNETAR QED EXPLORER
-# ──────────────────────────────────────────────────────────────────────────────
+# Module 2: Magnetar QED
 def show_magnetar_demo():
     st.markdown("### 🧲 Magnetar Dipole Field")
     st.markdown(r"""
@@ -283,24 +257,22 @@ def show_magnetar_demo():
 def show_magnetar_credits():
     show_credits_panel(
         "Magnetar QED Explorer",
-        original_contributions=[
+        [
             "Simplified dark photon conversion probability P = ε²(1 - e^{-B²/m²})",
             "Kerr phase modification for interference patterns"
         ],
-        standard_sources=[
+        [
             "Dipole field: Jackson (1998)",
             "Euler-Heisenberg Lagrangian: Heisenberg & Euler (1936)"
         ],
-        key_references=[
+        [
             "Jackson, J.D. (1998). Classical Electrodynamics.",
             "Heisenberg, W., & Euler, H. (1936). Folgerungen aus der Diracschen Theorie."
         ]
     )
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# MODULE 3: PRIMORDIAL ENTANGLEMENT
-# ──────────────────────────────────────────────────────────────────────────────
+# Module 3: Primordial Entanglement
 def show_primordial_demo():
     st.markdown("### 🌀 Photon-Dark Photon Entanglement Evolution")
     st.markdown(r"""
@@ -366,25 +338,23 @@ def show_primordial_demo():
 def show_primordial_credits():
     show_credits_panel(
         "Primordial Entanglement",
-        original_contributions=[
+        [
             "Application of von Neumann evolution to photon-dark photon system",
             "Integration with expanding FLRW background",
             "Full test suite with entropy and concurrence metrics"
         ],
-        standard_sources=[
+        [
             "Von Neumann equation: Standard quantum mechanics",
             "Entanglement entropy: Standard quantum information"
         ],
-        key_references=[
+        [
             "Von Neumann, J. (1932). Mathematische Grundlagen der Quantenmechanik.",
             "Nielsen, M.A., & Chuang, I.L. (2010). Quantum Computation and Quantum Information."
         ]
     )
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# MODULE 4: DARK LEAKAGE DETECTION
-# ──────────────────────────────────────────────────────────────────────────────
+# Module 4: Dark Leakage Detection
 def show_dark_leakage_demo():
     st.markdown("### 🌌 Dark Leakage Detection")
     st.markdown(r"""
@@ -409,31 +379,29 @@ def show_dark_leakage_demo():
     if p_leak > 50:
         st.markdown('<div class="leakage-alert">⚠️ HIGH LEAKAGE SIGNATURE DETECTED</div>', unsafe_allow_html=True)
     
-    st.info("💡 **Note:** For full real-time functionality, deploy with OpenSky API access. This demonstrates the detection algorithm derived from your dark photon theory.")
+    st.info("💡 Note: For full real-time functionality, deploy with OpenSky API access. This demonstrates the detection algorithm derived from dark photon theory.")
 
 
 def show_dark_leakage_credits():
     show_credits_panel(
         "Dark Leakage Detection",
-        original_contributions=[
+        [
             "Detection kernel derived from dark photon kinetic mixing P_conv = ε²(1-e^{-B²/m²})",
             "Translation of theoretical mixing to real-time leakage signature",
             "OpenSky Network integration for public data",
             "Coincidence event classification algorithm"
         ],
-        standard_sources=[
+        [
             "OpenSky Network API: Public transponder data",
             "Radar principles: Standard detection theory"
         ],
-        key_references=[
+        [
             "OpenSky Network. https://opensky-network.org"
         ]
     )
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# MODULE 5: QCIS POWER SPECTRA
-# ──────────────────────────────────────────────────────────────────────────────
+# Module 5: QCIS Power Spectra
 def show_qcis_demo():
     st.markdown("### 📊 Quantum-Corrected Power Spectrum")
     st.markdown(r"""
@@ -470,35 +438,30 @@ def show_qcis_demo():
 def show_qcis_credits():
     show_credits_panel(
         "QCIS Power Spectra",
-        original_contributions=[
+        [
             "Phenomenological correction P(k) = P_ΛCDM × (1 + f_NL (k/k₀)^{n_q})",
             "Parameterization of quantum gravitational effects"
         ],
-        standard_sources=[
+        [
             "ΛCDM power spectrum: Standard cosmology",
             "Mukhanov-Sasaki equation: Mukhanov & Chibisov (1981)"
         ],
-        key_references=[
+        [
             "Mukhanov, V.F., & Chibisov, G.V. (1981). Quantum fluctuations and a nonsingular universe.",
             "Planck Collaboration (2020). Planck 2018 results."
         ]
     )
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# MODULE 6: WFC3 PSF TOOLKIT
-# ──────────────────────────────────────────────────────────────────────────────
+# Module 6: WFC3 PSF Toolkit
 def show_psf_demo():
     st.markdown("### 🔭 WFC3 PSF Toolkit")
     st.markdown("""
     **HST Wide Field Camera 3 PSF Modeling**
     
     **Supported detectors:** UVIS, IR
-    
     **Supported filters:** F275W, F336W, F438W, F475W, F555W, F606W, F814W, F098M, F105W, F125W, F160W
-    
     **Time dependence:** 0.5% annual FWHM degradation (2009-2022)
-    
     **Deconvolution:** Regularized Richardson-Lucy (20 iterations)
     """)
     
@@ -532,9 +495,7 @@ def show_psf_demo():
     st.download_button("📥 Download PSF", buf.getvalue(), f"psf_{detector}_{filter_name}_{year}.png")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# MODULE 7: ENTANGLEMENT-CORRECTED COSMOLOGY (ECC)
-# ──────────────────────────────────────────────────────────────────────────────
+# Module 7: ECC
 def show_ecc_demo():
     st.markdown("### 🌠 Entanglement-Corrected Cosmology")
     st.markdown(r"""
@@ -585,9 +546,7 @@ def show_ecc_demo():
     st.download_button("📥 Download ECC Plot", buf.getvalue(), "ecc_evolution.png")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# MODULE 8: NICKEL LASER EXPERIMENT
-# ──────────────────────────────────────────────────────────────────────────────
+# Module 8: Nickel Laser Experiment
 def show_nickel_demo():
     st.markdown("### ⚛️ Nickel Laser Experiment (Proposed)")
     st.markdown(r"""
@@ -609,12 +568,10 @@ def show_nickel_demo():
     c2.metric("Fringe Drift", "2.1 arcsec", delta="±0.7")
     c3.metric("SNSPD Counts", "50 counts/hr", delta="±20")
     
-    st.info("📝 **Next Steps:** Seek laboratory collaboration for implementation. This experiment would directly test the kinetic mixing parameter ε in a controlled laboratory setting.")
+    st.info("📝 Next Steps: Seek laboratory collaboration for implementation. This experiment would directly test the kinetic mixing parameter ε in a controlled laboratory setting.")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# MODULE 9: ASTRONOMICAL IMAGE REFINER
-# ──────────────────────────────────────────────────────────────────────────────
+# Module 9: Astronomical Image Refiner
 PRELOADED_FILES = {
     "🌌 Abell 1689 (HST ACS F814W)": {
         "type": "real", "instrument": "HST ACS", "target": "Abell 1689",
@@ -690,7 +647,7 @@ def show_image_refiner_demo():
             st.markdown(f"**{name}**")
             st.caption(f"{info['instrument']} | {info['target']}")
             st.caption(info['description'][:50] + "...")
-            if st.button(f"Load", key=f"load_img_{i}"):
+            if st.button("Load", key=f"load_img_{i}"):
                 image_data = load_preloaded_file(info)
                 st.session_state.refiner_image = image_data
                 st.session_state.refiner_name = name
@@ -700,7 +657,7 @@ def show_image_refiner_demo():
         st.markdown(f"#### ✅ Loaded: {st.session_state.refiner_name}")
         fig, ax = plt.subplots(figsize=(6, 6))
         ax.imshow(st.session_state.refiner_image, cmap='viridis', origin='lower')
-        ax.set_title(f"{st.session_state.refiner_name}")
+        ax.set_title(st.session_state.refiner_name)
         ax.axis('off')
         st.pyplot(fig)
         plt.close(fig)
@@ -710,24 +667,23 @@ def show_image_refiner_demo():
         st.download_button("📥 Download Image", buf.getvalue(), f"{st.session_state.refiner_name}.png")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# ABOUT SECTION
-# ──────────────────────────────────────────────────────────────────────────────
+# About Section
 def show_about_section():
     st.markdown("# 🌌 Quantum Cosmology & Astrophysics Unified Suite (QCAUS)")
     st.markdown("### Version 1.0 | First Release | April 2026")
     
-    st.markdown("""
-    <div style="background: rgba(0, 20, 40, 0.8); border-radius: 12px; padding: 20px; margin: 15px 0; border: 1px solid #00aaff;">
-        <h3>👤 Author & Principal Investigator</h3>
-        <p><strong>Tony Eugene Ford</strong><br>
-        Independent Researcher in Astrophysics & Quantum Systems<br>
-        📧 tlcagford@gmail.com<br>
-        🐙 github.com/tlcagford<br>
-        🌐 https://qcaustfordmodel.streamlit.app/</p>
-        <p><em>Veteran | Retired Federal | University of Tennessee, Middle Tennessee State University | Colorado</em></p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        '<div style="background: rgba(0, 20, 40, 0.8); border-radius: 12px; padding: 20px; margin: 15px 0; border: 1px solid #00aaff;">'
+        '<h3>👤 Author & Principal Investigator</h3>'
+        '<p><strong>Tony Eugene Ford</strong><br>'
+        'Independent Researcher in Astrophysics & Quantum Systems<br>'
+        '📧 tlcagford@gmail.com<br>'
+        '🐙 github.com/tlcagford<br>'
+        '🌐 https://qcaustfordmodel.streamlit.app/</p>'
+        '<p><em>Veteran | Retired Federal | University of Tennessee, Middle Tennessee State University | Colorado</em></p>'
+        '</div>',
+        unsafe_allow_html=True
+    )
     
     st.markdown("## 📋 Overview")
     st.markdown("""
@@ -741,99 +697,4 @@ def show_about_section():
     - Downloadable plots and data in PNG format
     - Preloaded test images for immediate demonstration
     - Full attribution and citations for all physics
-    """)
-    
-    modules_data = {
-        "Module": [
-            "Astronomical Image Refiner",
-            "FDM Soliton & PDP Overlay",
-            "Magnetar QED Explorer",
-            "Primordial Entanglement",
-            "Dark Leakage Detection",
-            "QCIS Power Spectra",
-            "WFC3 PSF Toolkit",
-            "Entanglement-Corrected Cosmology (ECC)",
-            "Nickel Laser Experiment"
-        ],
-        "Status": ["✅ Deployed"] * 9,
-        "Key Output": [
-            "PSF-corrected HST/JWST images",
-            "r_c = 74±4 kpc, Ω_PD = 0.20",
-            "B/B_crit ~ 10⁵, P_conv ~ ε²",
-            "S = -Tr(ρ log ρ)",
-            "Real-time leakage signatures",
-            "P(k) = P_ΛCDM × (1 + f_NL(k/k₀)^{n_q})",
-            "Time-dependent HST PSFs",
-            "ΔH₀ reduction from 5σ → 2σ",
-            "F ~ 10⁻¹⁰ N prediction"
-        ]
-    }
-    st.dataframe(pd.DataFrame(modules_data), use_container_width=True)
-    
-    with st.expander("📜 Contributions & Attribution"):
-        st.markdown("""
-        **Original Contributions (Tony E. Ford):**
-        - Two-field coupled Schrödinger-Poisson system with εΦ mixing
-        - Ω_PD entanglement observable (Ω_PD = 0.20 from Abell 1689 fit)
-        - Simplified dark photon conversion probability P = ε²(1-e^{-B²/m²})
-        - Quantum-corrected power spectrum P(k) = P_ΛCDM × (1 + f_NL(k/k₀)^{n_q})
-        - Dark Leakage Detection algorithm for real-time signatures
-        - WFC3 PSF toolkit with 13-year time-dependent models
-        - Entanglement-Corrected Cosmology (ECC) for Hubble tension
-        - Nickel laser experiment proposal
-        - Complete integration of 9 modules into unified framework
-        
-        **Standard Implementations (Cited Sources):**
-        - FDM soliton profile: Hui et al. 2017; Ruffini & Bonazzola 1969
-        - Magnetar dipole field: Jackson 1998
-        - Euler-Heisenberg QED: Heisenberg & Euler 1936
-        - Von Neumann entropy: Standard quantum information
-        - Bayesian detection: Standard probability theory
-        - Richardson-Lucy deconvolution: Standard image processing
-        """)
-    
-    with st.expander("📊 Validation: Abell 1689 Fit"):
-        st.markdown("""
-        | Parameter | Value |
-        |-----------|-------|
-        | Core radius r_c | 74 ± 4 kpc |
-        | Central density ρ_c | (5.15 ± 0.25) × 10⁸ M⊙/kpc³ |
-        | Entanglement observable Ω_PD | 0.20 |
-        | Reduced χ² (joint HST+JWST) | 1.08 |
-        | Fringe spacing λ | 3.14 kpc |
-        """)
-        st.caption("Data: HST ACS F814W (Proposal 9289) + JWST NIRCam F200W (Proposal 5782)")
-        st.markdown('<span class="validation-badge">✓ Validated against real HST/JWST data</span>', unsafe_allow_html=True)
-    
-    st.markdown("## 🙏 Acknowledgments")
-    st.markdown("""
-    - **NASA/ESA Hubble Space Telescope & JWST** — Public FITS data via MAST
-    - **OpenSky Network** — Live aircraft data for Dark Leakage Detection
-    - **Streamlit** — Free Community Cloud hosting
-    - **Open-source scientific Python community** — NumPy, SciPy, Matplotlib, Astropy
-    
-    ### Theoretical Foundations
-    - **FDM / Schrödinger-Poisson:** Hui et al. (2017), Ruffini & Bonazzola (1969)
-    - **Magnetar QED:** Heisenberg & Euler (1936), Schwinger (1951)
-    - **Dark Photon Kinetic Mixing:** Holdom (1986), Fabbrichesi et al. (2020)
-    - **Cosmological Perturbations:** Mukhanov & Chibisov (1981), Planck Collaboration (2020)
-    """)
-    
-    st.markdown("## 📜 License")
-    st.markdown("""
-    **Dual License:**
-    - **Academic / Non-Commercial Use:** Free for research, education, and personal projects. Attribution required.
-    - **Commercial Use:** Requires separate license. Contact author for details.
-    """)
-    
-    st.markdown("## 📄 Citation")
-    st.markdown("""
-    ```bibtex
-    @software{Ford2026QCAUS,
-      author = {Ford, Tony E.},
-      title = {Quantum Cosmology \& Astrophysics Unified Suite (QCAUS)},
-      year = {2026},
-      version = {1.0},
-      url = {https://github.com/tlcagford/QCAUS},
-      doi = {10.5281/zenodo.xxxxxxx}
-    }
+   

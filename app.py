@@ -92,4 +92,4 @@ else:
     st.pyplot(fig)
 
 st.success("✅ Animated interference wave is now LIVE + error fixed!")
-st.info("Copy the entire code above → paste into app.py → push to GitHub → restart your Streamlit app.")
+

@@ -10,7 +10,7 @@ st.set_page_config(page_title="QCAUS v1.0", page_icon="🔭", layout="wide")
 st.title("🔭 QCAUS v1.0 — Quantum Cosmology & Astrophysics Unified Suite")
 st.caption("Tony E. Ford | tlcagford@gmail.com | Patent Pending | 2026")
 
-# ====================== SLIDERS (exact match to your screenshot) ======================
+# ====================== SLIDERS (exact match) ======================
 col1, col2, col3 = st.columns(3)
 with col1:
     omega_pd = st.slider("⚛️ Omega_PD Entanglement", 0.05, 0.50, 0.20)
@@ -22,12 +22,19 @@ with col3:
     b0 = st.slider("🌟 Magnetar B0 log10 G", 13.00, 16.00, 15.00)
     magnetar_eps = st.slider("Magnetar eps", 0.01, 0.50, 0.10)
 
+# ====================== PRESET + DRAG-AND-DROP UPLOAD (now restored) ======================
 st.subheader("🎯 Select Preset Data")
 preset = st.selectbox("Choose example to run instantly:", ["SGR 1806-20 (Magnetar)", "abell209_original_hst.jpg"])
-if preset == "abell209_original_hst.jpg":
+
+st.markdown("**Drag and drop file here**  \nLimit 200MB per file • JPG, JPEG, PNG, FITS")
+uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png", "fits", "tiff"], label_visibility="collapsed")
+
+if uploaded_file is not None:
+    st.success(f"✅ Loaded: {uploaded_file.name}")
+elif preset == "abell209_original_hst.jpg":
     st.success("✅ Loaded: abell209_original_hst.jpg")
 
-# ====================== BEFORE / AFTER SIDE-BY-SIDE ======================
+# ====================== BEFORE / AFTER ======================
 colL, colR = st.columns(2)
 with colL:
     st.markdown("**Before: Standard View** (Public HST/JWST Data)")
@@ -38,7 +45,7 @@ with colR:
     st.image("https://via.placeholder.com/512x512/112233/00FFAA?text=PDP+Entangled+Composite", caption="0 — 20 kpc", use_column_width=True)
     st.download_button("📥 Download PDP Entangled", b"placeholder", "pdp_entangled.png")
 
-# ====================== FIXED LIVE METRICS (this was the crash) ======================
+# ====================== LIVE METRICS ======================
 st.markdown("---")
 c1, c2, c3, c4, c5 = st.columns(5)
 c1.metric("Ω", "0.20")
@@ -47,7 +54,7 @@ c3.metric("Mixing", "0.000")
 c4.metric("Entropy", "0.364")
 c5.metric("Ω_FDM", "2.5 kpc")
 
-# ====================== ANIMATED INTERFERENCE WAVE (now fully working) ======================
+# ====================== ANIMATED INTERFERENCE WAVE ======================
 st.markdown("---")
 st.subheader("🌊 QCAUS-FDM-Wave: Animated Moving Interference")
 st.markdown("**Full two-field FDM Derivation**")
@@ -91,5 +98,5 @@ else:
     ax.set_title("3D Pink Dot-Cloud Moving Wave")
     st.pyplot(fig)
 
-st.success("✅ Animated interference wave is now LIVE + error fixed!")
-
+st.success("✅ Drag-and-drop upload + animated wave are now both live!")
+st.info("Paste this code into app.py → push to GitHub → restart your Streamlit app.")

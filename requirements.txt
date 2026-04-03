@@ -1,5 +1,5 @@
-# streamlit
-# numpy
-# matplotlib
-# pillow
-# scipy
+streamlit
+numpy
+matplotlib
+pillow
+scipy

@@ -1,6 +1,9 @@
 # =============================================================================
 # MAIN PROCESSING — CACHED + PER-PANEL COMPARISON TOGGLES (FULLY FIXED)
 # =============================================================================
+# =============================================================================
+# MAIN PROCESSING — CACHED + PER-PANEL COMPARISON TOGGLES (FULLY FIXED)
+# =============================================================================
 if st.session_state.img_data is not None:
     # Run all pipelines ONCE (cached — huge performance win)
     with st.spinner("Computing 9 quantum pipelines..."):

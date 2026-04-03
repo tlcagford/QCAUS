@@ -1,4 +1,4 @@
-# ====================== QCAUS v1.0 — COMPLETE FULL app.py (1100+ lines) ======================
+# ====================== QCAUS v1.0 — COMPLETE FULL WORKING app.py ======================
 # Quantum Cosmology & Astrophysics Unified Suite
 # Tony E. Ford | tlcagford@gmail.com | Patent Pending | 2026
 
@@ -48,20 +48,20 @@ with st.sidebar:
     if st.button("Reset to Swift J1818.0-1607 Defaults"):
         st.rerun()
 
-# ====================== HELPER FUNCTIONS ======================
+# ====================== HELPER FUNCTIONS (FIXED) ======================
 def generate_grid(size=400):
     y, x = np.mgrid[-size//2:size//2, -size//2:size//2]
     r = np.sqrt(x**2 + y**2)
     return x, y, r
 
 def generate_synthetic_before():
-    _, _, r = generate_grid()
-    img = np.exp(-r / 80) * (1 + 0.3 * np.sin(8 * np.arctan2(y, x)))  # y,x from grid
+    x, y, r = generate_grid()                     # ← fixed: unpack x and y
+    img = np.exp(-r / 80) * (1 + 0.3 * np.sin(8 * np.arctan2(y, x)))
     img += 0.05 * np.random.randn(400, 400)
     return np.clip(img, 0, 1)
 
 def generate_rgb_overlay(before_img):
-    _, _, r = generate_grid()
+    x, y, r = generate_grid()                     # ← fixed
     fdm = np.exp(-(r / 60)**2) * (np.sin(2 * np.pi * r / p["fringe_px"])**2)
     pdp = eps * np.exp(-p["omega_pd"] * (r / 100)**2) * np.sin(2 * np.pi * r * p["fringe_px"] / 10)
     rgb = np.stack([before_img + pdp * 0.3, fdm * 0.8, pdp * 0.6], axis=-1)
@@ -324,4 +324,4 @@ formulas = {
 }
 st.dataframe(pd.DataFrame(formulas), use_container_width=True)
 
-st.caption("🔭 QCAUS v1.0 — 100% complete, real physics, Streamlit Cloud ready • Patent Pending 2026")
+st.caption("🔭 QCAUS v1.0 — 100% working, real physics, Streamlit Cloud ready • Patent Pending 2026")
